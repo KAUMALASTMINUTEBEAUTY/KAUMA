@@ -111,17 +111,26 @@ function useSupabaseSlots() {
       .then(partnersData => {
         const merged = slotsData.map(s => {
           const p = partnersData.find(x => String(x.id) === String(s.partner_id)) || {};
+          const salonName = p.Nome_salone || p.nome_salone || p.name || 'Centro';
+          const city = p.citta || p.Citta || s.zona || 'Brianza';
+          const rawPrice = Number(s.prezzo) || 0;
+          const discountPct = Number(s.sconto_perc) || 0;
+          const finalPrice = discountPct > 0 ? Math.round(rawPrice * (1 - discountPct / 100)) : rawPrice;
           return {
             id: s.id,
             name: s.servizio || 'Servizio',
-            category: (s.categoria || 'beauty').toLowerCase(),
-            studio: p.Nome_salone || p.nome_salone || 'Centro',
-            location: p.citta || s.zona || 'Brianza',
-            price: s.sconto_perc > 0 ? Math.round(s.prezzo*(1-s.sconto_perc/100)) : (s.prezzo || 0),
+            category: (s.categoria || 'beauty').toUpperCase(),
+            salon: salonName,
+            zone: city,
+            location: city,
+            distance: '',
+            coords: '',
+            price: finalPrice,
             available: 'Oggi, ' + (s.orario || ''),
             duration: (s.durata_min || 60) + ' min',
-            description: s.note || '',
-            discount: s.sconto_perc || 0,
+            desc: s.note || '',
+            color: '#e8ddd0',
+            discount: discountPct,
           };
         });
         setSlots(merged);
