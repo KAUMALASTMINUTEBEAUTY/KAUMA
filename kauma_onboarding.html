@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kauma · Diventa Partner</title>
+  <meta name="theme-color" content="#faf7f2">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Josefin+Sans:ital,wght@0,100;0,200;0,300;1,100&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:    #faf7f2;
+      --sand:     #f0e8dc;
+      --linen:    #e8ddd0;
+      --nude:     #c9a882;
+      --caramel:  #a07850;
+      --brown:    #6b4423;
+      --espresso: #2c1f14;
+    }
+
+    body {
+      background: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      color: var(--espresso);
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--cream);
+      border-bottom: 1px solid var(--linen);
+      padding: 22px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo-arch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-text {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 17px;
+      letter-spacing: 0.48em;
+      color: var(--espresso);
+      text-transform: uppercase;
+      padding-left: 0.48em;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: var(--sand);
+      border-bottom: 1px solid var(--linen);
+      padding: 56px 32px 52px;
+      text-align: center;
+    }
+
+    .hero-label {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: var(--caramel);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(32px, 5vw, 48px);
+      color: var(--espresso);
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+    }
+
+    .hero p {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: var(--brown);
+      line-height: 1.8;
+      max-width: 480px;
+      margin: 0 auto 28px;
+    }
+
+    .pills {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--caramel);
+      border: 1px solid var(--nude);
+      border-radius: 20px;
+      padding: 6px 16px;
+    }
+
+    /* ── Form container ── */
+    .form-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 52px 24px 80px;
+    }
+
+    /* ── Section headers ── */
+    .section-title {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      color: var(--caramel);
+      text-transform: uppercase;
+      padding-left: 0.4em;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--linen);
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    /* ── Fields ── */
+    .field {
+      margin-bottom: 28px;
+    }
+
+    .field label {
+      display: block;
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 0.32em;
+      color: var(--caramel);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      padding-left: 0.32em;
+    }
+
+    .field label .req {
+      color: var(--nude);
+      margin-left: 4px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--linen);
+      color: var(--espresso);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      padding: 8px 0;
+      outline: none;
+      transition: border-color 0.2s;
+      border-radius: 0;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-bottom-color: var(--espresso);
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: rgba(44,31,20,0.28);
+    }
+
+    .field select {
+      cursor: pointer;
+      color: var(--espresso);
+    }
+
+    .field select option[value=""] {
+      color: rgba(44,31,20,0.28);
+    }
+
+    .field textarea {
+      resize: none;
+      height: 80px;
+      line-height: 1.7;
+    }
+
+    .field-hint {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 11px;
+      color: rgba(44,31,20,0.38);
+      margin-top: 7px;
+      line-height: 1.6;
+    }
+
+    /* ── Two columns ── */
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 32px;
+    }
+
+    @media (max-width: 480px) {
+      .row-2 { grid-template-columns: 1fr; }
+    }
+
+    /* ── Category chips ── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .chip {
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--espresso);
+      border: 1px solid var(--linen);
+      border-radius: 20px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .chip.active {
+      background: var(--espresso);
+      color: var(--cream);
+      border-color: var(--espresso);
+    }
+
+    /* ── Privacy ── */
+    .privacy-box {
+      background: var(--sand);
+      border: 1px solid var(--linen);
+      border-radius: 2px;
+      padding: 18px 20px;
+      margin-bottom: 28px;
+    }
+
+    .privacy-box label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .privacy-box input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      accent-color: var(--espresso);
+      cursor: pointer;
+    }
+
+    .privacy-box span {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      color: var(--brown);
+      line-height: 1.7;
+    }
+
+    .privacy-box a {
+      color: var(--caramel);
+      text-decoration: underline;
+    }
+
+    /* ── Submit ── */
+    .submit-btn {
+      width: 100%;
+      background: var(--espresso);
+      color: var(--cream);
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300;
+      font-size: 11px;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      padding: 18px 0 18px 12px;
+      transition: opacity 0.2s;
+    }
+
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .submit-note {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 11px;
+      color: rgba(44,31,20,0.35);
+      text-align: center;
+      margin-top: 12px;
+      line-height: 1.7;
+    }
+
+    /* ── Success screen ── */
+    #success {
+      display: none;
+      min-height: 70vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 24px;
+      gap: 20px;
+    }
+
+    #success.show { display: flex; }
+
+    .success-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--sand);
+      border: 1px solid var(--linen);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #success h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 32px;
+      color: var(--espresso);
+    }
+
+    #success p {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      color: var(--brown);
+      line-height: 1.8;
+      max-width: 380px;
+    }
+
+    /* ── Error msg ── */
+    .error-msg {
+      display: none;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      color: #c0392b;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--linen);
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <a href="https://kaumalastminutebeauty.github.io/kauma" class="logo-arch">
+    <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
+      <path d="M1.2 28.8 L1.2 11 A9.8 9.8 0 0 1 20.8 11 L20.8 28.8" stroke="#2c1f14" stroke-width="1.2" fill="none" stroke-linecap="square"/>
+    </svg>
+    <span class="logo-text">KAUMA</span>
+  </a>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-label">Per i professionisti</div>
+  <h1>Diventa<br /><em>Partner Kauma</em></h1>
+  <p>Riempi gli slot vuoti dell'ultimo minuto. Zero abbonamenti, zero canone fisso — paghi solo il 15% sulle prenotazioni completate.</p>
+  <div class="pills">
+    <span class="pill">Solo su invito</span>
+    <span class="pill">Commissione 15%</span>
+    <span class="pill">Pagamento entro 48h</span>
+  </div>
+</div>
+
+<!-- Form -->
+<div class="form-wrap" id="form-wrap">
+  <form id="onboarding-form" novalidate>
+
+    <!-- 1. Il tuo centro -->
+    <div class="section">
+      <div class="section-title">01 · Il tuo centro</div>
+
+      <div class="field">
+        <label>Nome del salone / studio <span class="req">*</span></label>
+        <input type="text" id="nome_salone" placeholder="es. Centro Estetico Fiore" required />
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>Città <span class="req">*</span></label>
+          <input type="text" id="citta" placeholder="es. Seregno" required />
+        </div>
+        <div class="field">
+          <label>Zona / quartiere</label>
+          <input type="text" id="zona" placeholder="es. Centro storico" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Indirizzo completo</label>
+        <input type="text" id="indirizzo" placeholder="Via Roma 12, 20831 Seregno" />
+      </div>
+
+      <div class="field">
+        <label>Categoria principale <span class="req">*</span></label>
+        <div class="chips" id="categoria-chips">
+          <span class="chip" data-val="Estetista">Estetista</span>
+          <span class="chip" data-val="Parrucchiere">Parrucchiere</span>
+          <span class="chip" data-val="Nail Salon">Nail Salon</span>
+          <span class="chip" data-val="Massaggi">Massaggi</span>
+          <span class="chip" data-val="Yoga">Yoga</span>
+          <span class="chip" data-val="Pilates">Pilates</span>
+          <span class="chip" data-val="Personal Training">Personal Training</span>
+          <span class="chip" data-val="Altro">Altro</span>
+        </div>
+        <input type="hidden" id="categoria" required />
+      </div>
+    </div>
+
+    <!-- 2. Contatti -->
+    <div class="section">
+      <div class="section-title">02 · Contatti</div>
+
+      <div class="field">
+        <label>Nome del titolare <span class="req">*</span></label>
+        <input type="text" id="titolare" placeholder="Nome e cognome" required />
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>Telefono <span class="req">*</span></label>
+          <input type="tel" id="telefono" placeholder="+39 333 000 0000" required />
+        </div>
+        <div class="field">
+          <label>WhatsApp</label>
+          <input type="tel" id="whatsapp" placeholder="Stesso o diverso dal tel." />
+          <div class="field-hint">Useremo WhatsApp per inviarti le prenotazioni in tempo reale.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="info@tuostudio.it" />
+      </div>
+
+      <div class="field">
+        <label>Instagram</label>
+        <input type="text" id="instagram" placeholder="@tuostudio" />
+      </div>
+    </div>
+
+    <!-- 3. I tuoi servizi -->
+    <div class="section">
+      <div class="section-title">03 · I tuoi servizi</div>
+
+      <div class="field">
+        <label>Servizi offerti</label>
+        <textarea id="servizi" placeholder="es. Manicure gel, Pedicure, Facial, Massaggio relax…"></textarea>
+        <div class="field-hint">Elenca i servizi che vorresti pubblicare su Kauma. Potrai aggiungerli e modificarli liberamente dopo l'attivazione.</div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>Prezzo medio (€)</label>
+          <input type="number" id="prezzo_medio" placeholder="es. 65" min="0" />
+        </div>
+        <div class="field">
+          <label>Durata media (minuti)</label>
+          <input type="number" id="durata_media" placeholder="es. 60" min="0" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Disponibilità tipica per slot last minute</label>
+        <select id="disponibilita">
+          <option value="">Seleziona…</option>
+          <option value="Mattina">Mattina (9:00 – 13:00)</option>
+          <option value="Pomeriggio">Pomeriggio (13:00 – 18:00)</option>
+          <option value="Sera">Sera (18:00 – 21:00)</option>
+          <option value="Variabile">Variabile — inserisco di volta in volta</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 4. Pagamenti -->
+    <div class="section">
+      <div class="section-title">04 · Pagamenti</div>
+
+      <div class="field">
+        <label>IBAN <span class="req">*</span></label>
+        <input type="text" id="iban" placeholder="IT00 X000 0000 0000 0000 0000 000" required />
+        <div class="field-hint">Utilizziamo l'IBAN per accreditarti i pagamenti entro 48h dalla prenotazione completata. I dati sono cifrati e non vengono condivisi con terzi.</div>
+      </div>
+
+      <div class="field">
+        <label>Intestatario conto</label>
+        <input type="text" id="intestatario" placeholder="Nome o ragione sociale" />
+      </div>
+
+      <div class="field">
+        <label>Partita IVA / Codice fiscale</label>
+        <input type="text" id="piva" placeholder="es. IT12345678901" />
+        <div class="field-hint">Necessario per emissione ricevute e fatture.</div>
+      </div>
+    </div>
+
+    <!-- 5. Note -->
+    <div class="section">
+      <div class="section-title">05 · Note libere</div>
+      <div class="field">
+        <label>Vuoi dirci altro?</label>
+        <textarea id="note" placeholder="Domande, esigenze particolari, come hai conosciuto Kauma…"></textarea>
+      </div>
+    </div>
+
+    <!-- Privacy -->
+    <div class="privacy-box">
+      <label>
+        <input type="checkbox" id="privacy" required />
+        <span>Accetto il trattamento dei dati personali secondo la <a href="#">Privacy Policy</a> di Kauma e confermo di aver letto le <a href="#">condizioni per i partner</a>. Commissione del 15% su ogni prenotazione completata, senza canone fisso.</span>
+      </label>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submit-btn">Invia candidatura</button>
+    <p class="submit-note">Ti ricontattiamo entro 48 ore per completare l'attivazione.</p>
+    <div class="error-msg" id="error-msg">Qualcosa è andato storto. Riprova o scrivi a <strong>kauma.app@outlook.com</strong></div>
+
+  </form>
+</div>
+
+<!-- Success -->
+<div id="success">
+  <div class="success-icon">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M5 11l5 5 7-8" stroke="#2c1f14" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <h2>Candidatura inviata</h2>
+  <p>Grazie! Abbiamo ricevuto i tuoi dati e ti ricontattiamo entro 48 ore per completare l'attivazione su Kauma.</p>
+  <p style="font-size:12px; color:rgba(44,31,20,0.4);">— Il team Kauma</p>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://wgcxsuvqazrsahbegjul.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndnY3hzdXZxYXpyc2FoYmVnanVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTgxMDUsImV4cCI6MjA5Mjg5NDEwNX0.uedcq0bpf_EVqj4G0yXdJTeGUzCC54iQQH7O9NduRBM';
+
+  /* ── Category chips ── */
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      document.getElementById('categoria').value = chip.dataset.val;
+    });
+  });
+
+  /* ── Form submit ── */
+  document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById('submit-btn');
+    const errMsg = document.getElementById('error-msg');
+    errMsg.classList.remove('show');
+
+    // Validation
+    const required = ['nome_salone', 'citta', 'categoria', 'titolare', 'telefono', 'iban', 'privacy'];
+    for (const id of required) {
+      const el = document.getElementById(id);
+      if (id === 'privacy' && !el.checked) {
+        el.focus();
+        errMsg.textContent = 'Accetta la privacy policy per continuare.';
+        errMsg.classList.add('show');
+        return;
+      }
+      if (id !== 'privacy' && !el.value.trim()) {
+        el.focus();
+        errMsg.textContent = 'Compila tutti i campi obbligatori (*)';
+        errMsg.classList.add('show');
+        return;
+      }
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Invio in corso…';
+
+    const payload = {
+      Nome_salone:   document.getElementById('nome_salone').value.trim(),
+      titolare:      document.getElementById('titolare').value.trim(),
+      categoria:     document.getElementById('categoria').value,
+      citta:         document.getElementById('citta').value.trim(),
+      zona:          document.getElementById('zona').value.trim() || null,
+      indirizzo:     document.getElementById('indirizzo').value.trim() || null,
+      telefono:      document.getElementById('telefono').value.trim(),
+      whatsapp:      document.getElementById('whatsapp').value.trim() || document.getElementById('telefono').value.trim(),
+      email:         document.getElementById('email').value.trim() || null,
+      instagram:     document.getElementById('instagram').value.trim() || null,
+      servizi:       document.getElementById('servizi').value.trim() || null,
+      prezzo_medio:  document.getElementById('prezzo_medio').value ? Number(document.getElementById('prezzo_medio').value) : null,
+      durata_media:  document.getElementById('durata_media').value ? Number(document.getElementById('durata_media').value) : null,
+      disponibilita: document.getElementById('disponibilita').value || null,
+      iban:          document.getElementById('iban').value.trim().replace(/\s/g, ''),
+      intestatario:  document.getElementById('intestatario').value.trim() || null,
+      piva:          document.getElementById('piva').value.trim() || null,
+      note:          document.getElementById('note').value.trim() || null,
+      stato:         'In attesa',
+      gestito_da:    null,
+    };
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/Partner`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('Supabase error:', err);
+        throw new Error(err.message || 'Errore Supabase');
+      }
+
+      // Success
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('success').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      console.error(err);
+      btn.disabled = false;
+      btn.textContent = 'Invia candidatura';
+      errMsg.textContent = 'Qualcosa è andato storto. Riprova o scrivi a kauma.app@outlook.com';
+      errMsg.classList.add('show');
+    }
+  });
+</script>
+
+</body>
+</html>
