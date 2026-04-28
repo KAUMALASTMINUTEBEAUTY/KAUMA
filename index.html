@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kauma — Beauty Last Minute</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kauma">
+  <meta name="theme-color" content="#faf7f2">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Josefin+Sans:ital,wght@0,100;0,200;0,300;1,100&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #faf7f2; margin:0; padding:0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Scrollable screen areas */
+    .screen-scroll {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+    .screen-scroll::-webkit-scrollbar { display: none; }
+
+    /* Placeholder image blocks */
+    .img-placeholder {
+      background: #e8ddd0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-placeholder span {
+      font-family: monospace;
+      font-size: 9px;
+      color: rgba(107,68,35,0.35);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+<script type="text/babel">
+
+const { useState, useEffect, useRef } = React;
+
+/* ── Real time ── */
+function useRealTime() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(t);
+  }, []);
+  return now;
+}
+
+function formatDate(date) {
+  const giorni = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+  const mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  return giorni[date.getDay()] + ' ' + date.getDate() + ' ' + mesi[date.getMonth()];
+}
+
+function useGeoZone() {
+  const [zone, setZone] = useState("Brianza · Como");
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        if (lat > 45.7 && lng > 9.0 && lng < 9.3) setZone("Como · Montorfano");
+        else if (lat > 45.6 && lat <= 45.7) setZone("Brianza · Como");
+        else if (lat > 45.5 && lat <= 45.6) setZone("Brianza · Seregno");
+        else if (lat > 45.4 && lat <= 45.5) setZone("Brianza · Monza");
+        else setZone("Brianza · Como");
+      },
+      () => {}
+    );
+  }, []);
+  return zone;
+}
+
+/* ── Supabase slots hook ── */
+function useSupabaseSlots() {
+  const [slots, setSlots] = useState([]);
+  useEffect(() => {
+    fetch('https://wgcxsuvqazrsahbegjul.supabase.co/rest/v1/Slot?stato=eq.disponibile&select=*', {
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndnY3hzdXZxYXpyc2FoYmVnanVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTgxMDUsImV4cCI6MjA5Mjg5NDEwNX0.uedcq0bpf_EVqj4G0yXdJTeGUzCC54iQQH7O9NduRBM',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndnY3hzdXZxYXpyc2FoYmVnanVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTgxMDUsImV4cCI6MjA5Mjg5NDEwNX0.uedcq0bpf_EVqj4G0yXdJTeGUzCC54iQQH7O9NduRBM'
+      }
+    })
+    .then(r => r.ok ? r.json() : [])
+    .then(slotsData => {
+      if (!slotsData || !slotsData.length) return;
+      fetch('https://wgcxsuvqazrsahbegjul.supabase.co/rest/v1/Partner?select=*', {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndnY3hzdXZxYXpyc2FoYmVnanVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTgxMDUsImV4cCI6MjA5Mjg5NDEwNX0.uedcq0bpf_EVqj4G0yXdJTeGUzCC54iQQH7O9NduRBM',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndnY3hzdXZxYXpyc2FoYmVnanVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTgxMDUsImV4cCI6MjA5Mjg5NDEwNX0.uedcq0bpf_EVqj4G0yXdJTeGUzCC54iQQH7O9NduRBM'
+        }
+      })
+      .then(r => r.ok ? r.json() : [])
+      .then(partnersData => {
+        const merged = slotsData.map(s => {
+          const p = partnersData.find(x => String(x.id) === String(s.partner_id)) || {};
+          return {
+            id: s.id,
+            name: s.servizio || 'Servizio',
+            category: (s.categoria || 'beauty').toLowerCase(),
+            studio: p.Nome_salone || p.nome_salone || 'Centro',
+            location: p.citta || s.zona || 'Brianza',
+            price: s.sconto_perc > 0 ? Math.round(s.prezzo*(1-s.sconto_perc/100)) : (s.prezzo || 0),
+            available: 'Oggi, ' + (s.orario || ''),
+            duration: (s.durata_min || 60) + ' min',
+            description: s.note || '',
+            discount: s.sconto_perc || 0,
+          };
+        });
+        setSlots(merged);
+        console.log('Kauma: ' + merged.length + ' slots loaded'); if (partnersData.length > 0) console.log('Partner columns:', Object.keys(partnersData[0]));
+      });
+    })
+    .catch(e => console.log('Kauma error:', e.message));
+  }, []);
+  return slots;
+}
+
+
+
+
+/* ── Palette ── */
+const C = {
+  cream:    '#faf7f2',
+  sand:     '#f0e8dc',
+  linen:    '#e8ddd0',
+  nude:     '#c9a882',
+  caramel:  '#a07850',
+  brown:    '#6b4423',
+  espresso: '#2c1f14',
+};
+
+/* ── Arch Mark ── */
+function Arch({ size=24, color=C.espresso, sw }) {
+  const w = size;
+  const h = size * 1.35;
+  const r = w / 2;
+  const s = sw || size * 0.055;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
+      <path
+        d={`M ${s} ${h-s} L ${s} ${r} A ${r-s} ${r-s} 0 0 1 ${w-s} ${r} L ${w-s} ${h-s}`}
+        stroke={color} strokeWidth={s} fill="none" strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+/* ── Logo lockup ── */
+function Logo({ size=18, color=C.espresso, subColor=C.caramel, showSub=false }) {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+      <Arch size={size * 1.2} color={color} />
+      <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+        <div style={{
+          fontFamily:"'Josefin Sans'", fontWeight:400,
+          fontSize:size, letterSpacing:'0.48em',
+          color, textTransform:'uppercase', paddingLeft:'0.48em', lineHeight:1,
+        }}>KAUMA</div>
+        {showSub && (
+          <div style={{
+            fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontWeight:300,
+            fontSize:size * 0.52, color:subColor, letterSpacing:'0.03em',
+          }}>beauty booking</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+/* ── iOS Device Frame (inlined) ── */
+function IOSDevice({ children }) {
+  return (
+    <div style={{
+      width: 390,
+      height: 844,
+      borderRadius: 54,
+      background: '#1a1a1a',
+      padding: '12px',
+      boxShadow: '0 40px 80px rgba(44,31,20,0.35), 0 0 0 1px rgba(255,255,255,0.08)',
+      position: 'relative',
+      flexShrink: 0,
+    }}>
+      {/* Screen */}
+      <div style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: 44,
+        overflow: 'hidden',
+        background: '#faf7f2',
+        position: 'relative',
+      }}>
+        {/* Dynamic Island */}
+        <div style={{
+          position: 'absolute',
+          top: 12,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 120,
+          height: 34,
+          background: '#1a1a1a',
+          borderRadius: 20,
+          zIndex: 100,
+        }}/>
+        {/* Content area */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          paddingTop: 0,
+          overflow: 'hidden',
+        }}>
+          {children}
+        </div>
+      </div>
+      {/* Home indicator */}
+      <div style={{
+        position: 'absolute',
+        bottom: 20,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 134,
+        height: 5,
+        background: 'rgba(255,255,255,0.3)',
+        borderRadius: 3,
+      }}/>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════ */
+const treatments = [
+  {
+    id:1,
+    category:'VISO',
+    duration:'60 min',
+    name:'Glow Ritual',
+    salon:'Atelier Luce',
+    distance:'0.3 km',
+    zone:'Brera, Milano',
+    coords:'45.4739° N, 9.1861° E',
+    price:75,
+    available:'Oggi, 16:30',
+    desc:"Un trattamento rigenerante che combina esfoliazione enzimatica, massaggio lifting e maschera all'acido ialuronico. Pensato per restituire luminosità immediata.",
+    color: '#e8ddd0',
+  },
+  {
+    id:2,
+    category:'MANICURE',
+    duration:'45 min',
+    name:'Gel Naturale',
+    salon:'Studio Nudo',
+    distance:'0.6 km',
+    zone:'Navigli, Milano',
+    coords:'45.4499° N, 9.1726° E',
+    price:55,
+    available:'Oggi, 17:15',
+    desc:'Applicazione gel a lunga durata con finitura ultra-naturale. Include cura cuticole, lima e massaggio mani con burro di karitè.',
+    color: '#f0e8dc',
+  },
+  {
+    id:3,
+    category:'MASSAGGIO',
+    duration:'90 min',
+    name:'Rituale del Corpo',
+    salon:'Spa Meridiana',
+    distance:'1.1 km',
+    zone:'Porta Venezia, Milano',
+    coords:'45.4773° N, 9.2056° E',
+    price:120,
+    available:'Oggi, 18:00',
+    desc:'Massaggio olistico con oli caldi al gelsomino e sandalo. Un percorso sensoriale che scioglie le tensioni e risveglia i sensi.',
+    color: '#e8ddd0',
+  },
+  {
+    id:4,
+    category:'CAPELLI',
+    duration:'75 min',
+    name:'Piega & Soin',
+    salon:'Atelier Capello',
+    distance:'0.8 km',
+    zone:'Garibaldi, Milano',
+    coords:'45.4841° N, 9.1879° E',
+    price:65,
+    available:'Oggi, 19:00',
+    desc:'Shampoo con trattamento nutriente, piega professionale e styling su misura. Capelli trasformati in meno di un\'ora.',
+    color: '#f0e8dc',
+  },
+];
+
+const wellnessPartners = [
+  {
+    id:'w1', type:'PILATES', name:'Studio Forma', location:'Brera · 0.4 km', zone:'Brera, Milano',
+    classes:[
+      { id:'c1', name:'Pilates Reformer', teacher:'Elena R.', time:'07:30', duration:'50 min', spots:2, price:28 },
+      { id:'c2', name:'Mat Pilates',      teacher:'Elena R.', time:'12:00', duration:'50 min', spots:5, price:22 },
+      { id:'c3', name:'Pilates Flow',     teacher:'Marco T.', time:'18:30', duration:'60 min', spots:1, price:25 },
+    ],
+    color:'#ede5da',
+  },
+  {
+    id:'w2', type:'YOGA', name:'Spazio Yoga Milano', location:'Navigli · 0.7 km', zone:'Navigli, Milano',
+    classes:[
+      { id:'c4', name:'Hatha Yoga',     teacher:'Amira S.', time:'08:00', duration:'75 min', spots:4, price:20 },
+      { id:'c5', name:'Yin & Restore',  teacher:'Amira S.', time:'19:00', duration:'90 min', spots:6, price:22 },
+      { id:'c6', name:'Vinyasa Flow',   teacher:'Jonas B.', time:'07:00', duration:'60 min', spots:3, price:20 },
+    ],
+    color:'#e5ddd4',
+  },
+  {
+    id:'w3', type:'PERSONAL TRAINING', name:'Atelier Corpo', location:'Porta Venezia · 1.0 km', zone:'Porta Venezia, Milano',
+    classes:[
+      { id:'c7', name:'Sessione 1:1',      teacher:'Luca M.', time:'09:00', duration:'60 min', spots:1, price:75 },
+      { id:'c8', name:'Duo Training',      teacher:'Luca M.', time:'11:00', duration:'60 min', spots:1, price:50 },
+      { id:'c9', name:'Forza & Mobilità',  teacher:'Sara V.', time:'17:00', duration:'45 min', spots:1, price:65 },
+    ],
+    color:'#ddd5ca',
+  },
+];
+
+const slots = [
+  { time:'14:00', avail:true },
+  { time:'14:30', avail:false },
+  { time:'15:15', avail:true },
+  { time:'16:00', avail:true },
+  { time:'16:30', avail:true },
+  { time:'17:15', avail:true },
+  { time:'18:00', avail:false },
+  { time:'19:00', avail:true },
+];
+
+/* ════════════════════════════════════════════
+   SCREENS
+════════════════════════════════════════════ */
+
+/* ── SPLASH ── */
+function SplashScreen({ onDone }) {
+  useEffect(() => { const t = setTimeout(onDone, 2200); return () => clearTimeout(t); }, []);
+  return (
+    <div style={{
+      width:'100%', height:'100%',
+      background:C.cream,
+      display:'flex', flexDirection:'column',
+      alignItems:'center', justifyContent:'center',
+      gap:0, position:'relative', overflow:'hidden',
+    }}>
+      <div style={{
+        position:'absolute', width:'100%', height:'100%',
+        background:'radial-gradient(ellipse at 60% 35%, rgba(201,168,130,0.22) 0%, transparent 65%)',
+      }}/>
+      <div style={{ position:'absolute', top:32, right:28, opacity:0.06 }}>
+        <Arch size={90} color={C.espresso} />
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:18, position:'relative', zIndex:1 }}>
+        <Arch size={36} color={C.espresso} />
+        <div style={{ fontFamily:"'Josefin Sans'", fontWeight:100, fontSize:28, letterSpacing:'0.55em', color:C.espresso, textTransform:'uppercase', paddingLeft:'0.55em' }}>KAUMA</div>
+        <div style={{ width:36, height:1, background:C.nude }} />
+        <div style={{ fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontWeight:300, fontSize:13, color:C.caramel, letterSpacing:'0.05em' }}>
+          the calm of the afternoon
+        </div>
+      </div>
+      <div style={{ position:'absolute', bottom:52, fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.28)', letterSpacing:'0.12em' }}>
+        Beauty, on your time.
+      </div>
+    </div>
+  );
+}
+
+/* ── HOME ── */
+function HomeScreen({ onSelect }) {
+  const now = useRealTime();
+  const geoZone = useGeoZone();
+  const supaSlots = useSupabaseSlots();
+  const cats = ['Tutti','Viso','Corpo','Capelli','Mani'];
+  const [cat, setCat] = useState(0);
+
+  return (
+    <div className="screen-scroll" style={{ background:C.cream }}>
+      {/* Header */}
+      <div style={{ padding:'16px 20px 12px', background:C.cream, position:'sticky', top:0, zIndex:10, borderBottom:`1px solid ${C.linen}` }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <Logo size={15} color={C.espresso} />
+          <div style={{ width:32, height:32, borderRadius:'50%', background:C.linen, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="5" r="2.5" stroke={C.espresso} strokeWidth="1.2"/>
+              <path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke={C.espresso} strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero greeting */}
+      <div style={{ padding:'24px 20px 20px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:6 }}>
+          <GeoTag zone={geoZone} />
+          <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:500, fontSize:20, color:'#3A2C1E' }}>{formatDate(now)} <span style={{fontFamily:"'DM Sans'", fontWeight:400, fontSize:14, color:'#8C7250'}}>· {new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}</span></div>
+        </div>
+        <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:300, fontSize:30, color:C.espresso, lineHeight:1.2 }}>
+          Cosa vuoi<br />
+          <span style={{ fontStyle:'italic' }}>per te oggi?</span>
+        </div>
+      </div>
+
+      {/* Search bar */}
+      <div style={{ padding:'0 20px 20px' }}>
+        <div style={{
+          background:C.sand, borderRadius:2,
+          padding:'12px 16px', display:'flex', alignItems:'center', gap:10,
+          border:`1px solid ${C.linen}`,
+        }}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="6" cy="6" r="4.5" stroke={C.caramel} strokeWidth="1.2"/>
+            <path d="M10 10l2.5 2.5" stroke={C.caramel} strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+          <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:13, color:'rgba(44,31,20,0.38)', letterSpacing:'0.02em' }}>
+            Trattamento, salone, zona…
+          </div>
+        </div>
+      </div>
+
+      {/* Category pills */}
+      <div style={{ paddingLeft:20, marginBottom:22, display:'flex', gap:8, overflowX:'auto' }}>
+        {cats.map((c,i) => (
+          <div key={i} onClick={() => setCat(i)} style={{
+            fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.32em',
+            textTransform:'uppercase', paddingLeft:'0.32em',
+            color: cat===i ? C.cream : C.espresso,
+            background: cat===i ? C.espresso : 'transparent',
+            border:`1px solid ${cat===i ? C.espresso : C.linen}`,
+            borderRadius:20, padding:'7px 16px', whiteSpace:'nowrap',
+            cursor:'pointer', flexShrink:0,
+          }}>{c}</div>
+        ))}
+      </div>
+
+      {/* Section label */}
+      <div style={{ padding:'0 20px 14px', display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+        <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.14em', color:C.caramel, textTransform:'uppercase' }}>
+          DISPONIBILI ORA
+        </div>
+        <div style={{ fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontSize:13, color:C.caramel }}>Vedi tutti →</div>
+      </div>
+
+      {/* Treatment cards */}
+      <div style={{ padding:'0 20px', display:'flex', flexDirection:'column', gap:12, paddingBottom:90 }}>
+        {(supaSlots.length > 0 ? supaSlots : treatments).map(t => (
+          <div key={t.id} onClick={() => onSelect(t)} style={{
+            background:'#fff', border:`1px solid ${C.linen}`,
+            borderRadius:3, overflow:'hidden',
+            boxShadow:'0 2px 12px rgba(44,31,20,0.05)',
+            cursor:'pointer', display:'flex',
+          }}>
+            {/* Image */}
+            <div className="img-placeholder" style={{ width:96, flexShrink:0, background:t.color }}>
+              <span>foto</span>
+            </div>
+            {/* Info */}
+            <div style={{ padding:'14px 16px', flex:1 }}>
+              <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.14em', color:C.caramel, textTransform:'uppercase', marginBottom:6, paddingLeft:'0.36em' }}>
+                {t.category} · {t.duration}
+              </div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:18, color:C.espresso, marginBottom:4, lineHeight:1.2 }}>{t.name}</div>
+              <div style={{ marginBottom:10 }}>
+                <GeoTag zone={`${t.salon} · ${t.zone}`} small={true} />
+              </div>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso }}>€{t.price}</div>
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:C.caramel, letterSpacing:'0.04em' }}>{t.available}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── DETAIL ── */
+function DetailScreen({ treatment: t, onBook, onBack }) {
+  return (
+    <div className="screen-scroll" style={{ background:C.cream, position:'relative' }}>
+      {/* Image hero */}
+      <div className="img-placeholder" style={{ width:'100%', height:220, background:t.color, position:'relative', flexShrink:0 }}>
+        <span>foto trattamento</span>
+        {/* Back */}
+        <div onClick={onBack} style={{
+          position:'absolute', top:16, left:16,
+          width:36, height:36, borderRadius:'50%',
+          background:'rgba(250,247,242,0.88)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          cursor:'pointer',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9 2L4 7l5 5" stroke={C.espresso} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ padding:'24px 22px', display:'flex', flexDirection:'column', gap:20 }}>
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.4em', color:C.caramel, textTransform:'uppercase', marginBottom:8, paddingLeft:'0.4em' }}>
+            {t.category} · {t.duration}
+          </div>
+          <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:28, color:C.espresso, lineHeight:1.15, marginBottom:6 }}>{t.name}</div>
+          <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:12, color:'rgba(44,31,20,0.5)' }}>
+            <GeoTag zone={`${t.salon} · ${t.zone}`} />
+          </div>
+        </div>
+
+        <div style={{ height:1, background:C.linen }} />
+
+        <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:13.5, color:C.brown, lineHeight:1.8 }}>
+          {t.desc}
+        </div>
+
+        <div style={{ height:1, background:C.linen }} />
+
+        {/* Details row */}
+        <div style={{ display:'flex', gap:0 }}>
+          {[
+            { label:'DURATA', value:t.duration },
+            { label:'PREZZO', value:`€${t.price}` },
+            { label:'DISTANZA', value:t.distance },
+          ].map((d,i) => (
+            <div key={i} style={{ flex:1, borderRight: i<2 ? `1px solid ${C.linen}` : 'none', paddingRight:16, paddingLeft: i>0 ? 16 : 0 }}>
+              <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.34em', color:C.caramel, textTransform:'uppercase', marginBottom:6 }}>{d.label}</div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:18, color:C.espresso }}>{d.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ height:1, background:C.linen }} />
+
+        {/* Salon info */}
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:12, paddingLeft:'0.38em' }}>IL SALONE</div>
+          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <div style={{ width:44, height:44, borderRadius:'50%', background:C.linen, flexShrink:0 }} />
+            <div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:17, color:C.espresso }}>{t.salon}</div>
+              <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', marginTop:2 }}>4.9 · 128 recensioni</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA fixed bottom */}
+      <div style={{
+        position:'sticky', bottom:0,
+        background:C.cream, borderTop:`1px solid ${C.linen}`,
+        padding:'16px 22px 28px',
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+      }}>
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.34em', color:C.caramel, textTransform:'uppercase', marginBottom:4 }}>PROSSIMO SLOT</div>
+          <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:17, color:C.espresso }}>{t.available}</div>
+        </div>
+        <button onClick={onBook} style={{
+          background:C.espresso, color:C.cream,
+          border:'none', borderRadius:2, cursor:'pointer',
+          fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.42em',
+          textTransform:'uppercase', padding:'14px 22px 14px 26px',
+        }}>Prenota</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── BOOKING ── */
+function BookingScreen({ treatment: t, onConfirm, onBack }) {
+  const [selectedSlot, setSelectedSlot] = useState(2);
+  const days = ['Oggi','Dom','Lun','Mar','Mer'];
+  const dates = ['24','25','26','27','28'];
+  const [day, setDay] = useState(0);
+
+  return (
+    <div className="screen-scroll" style={{ background:C.cream }}>
+      {/* Header */}
+      <div style={{ padding:'16px 20px 14px', background:C.cream, borderBottom:`1px solid ${C.linen}`, display:'flex', alignItems:'center', gap:14 }}>
+        <div onClick={onBack} style={{ cursor:'pointer' }}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9 2L4 7l5 5" stroke={C.espresso} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:12, letterSpacing:'0.38em', color:C.espresso, textTransform:'uppercase' }}>
+          SCEGLI ORARIO
+        </div>
+      </div>
+
+      <div style={{ padding:'22px 20px', display:'flex', flexDirection:'column', gap:24 }}>
+
+        {/* Summary pill */}
+        <div style={{ background:C.sand, border:`1px solid ${C.linen}`, borderRadius:2, padding:'14px 18px', display:'flex', gap:14, alignItems:'center' }}>
+          <div className="img-placeholder" style={{ width:44, height:44, borderRadius:2, background:t.color, flexShrink:0 }}>
+            <span style={{ fontSize:7 }}>foto</span>
+          </div>
+          <div>
+            <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso, lineHeight:1.2 }}>{t.name}</div>
+            <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', marginTop:2 }}>{t.salon} · €{t.price}</div>
+          </div>
+        </div>
+
+        {/* Day selector */}
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:14, paddingLeft:'0.38em' }}>DATA</div>
+          <div style={{ display:'flex', gap:8 }}>
+            {days.map((d,i) => (
+              <div key={i} onClick={() => setDay(i)} style={{
+                flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4, cursor:'pointer',
+                padding:'10px 4px', borderRadius:2,
+                background: day===i ? C.espresso : 'transparent',
+                border:`1px solid ${day===i ? C.espresso : C.linen}`,
+              }}>
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:9, color: day===i ? 'rgba(250,247,242,0.65)' : 'rgba(44,31,20,0.4)', letterSpacing:'0.06em' }}>{d}</div>
+                <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:18, color: day===i ? C.cream : C.espresso }}>{dates[i]}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Slot grid */}
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:14, paddingLeft:'0.38em' }}>ORARIO</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+            {slots.map((s,i) => (
+              <div key={i} onClick={() => s.avail && setSelectedSlot(i)} style={{
+                fontFamily:"'DM Sans'", fontWeight: selectedSlot===i ? 500 : 300, fontSize:13,
+                color: !s.avail ? 'rgba(44,31,20,0.2)' : selectedSlot===i ? C.cream : C.espresso,
+                background: selectedSlot===i ? C.espresso : 'transparent',
+                border:`1px solid ${!s.avail ? C.linen : selectedSlot===i ? C.espresso : C.linen}`,
+                borderRadius:2, padding:'11px 8px', cursor: s.avail ? 'pointer' : 'default',
+                textAlign:'center', transition:'all 0.15s',
+                textDecoration: !s.avail ? 'line-through' : 'none',
+                opacity: !s.avail ? 0.5 : 1,
+              }}>{s.time}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:10, paddingLeft:'0.38em' }}>NOTE (FACOLTATIVO)</div>
+          <div style={{ borderBottom:`1px solid ${C.linen}`, padding:'8px 0' }}>
+            <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:13, color:'rgba(44,31,20,0.3)', letterSpacing:'0.01em' }}>Allergie, preferenze…</div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div style={{ padding:'0 20px 40px' }}>
+        <button onClick={onConfirm} style={{
+          width:'100%', background:C.espresso, color:C.cream,
+          border:'none', borderRadius:2, cursor:'pointer',
+          fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:11, letterSpacing:'0.18em',
+          textTransform:'uppercase', padding:'16px 0 16px 8px',
+        }}>Conferma Prenotazione</button>
+        <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10.5, color:'rgba(44,31,20,0.35)', textAlign:'center', marginTop:10, lineHeight:1.7 }}>
+          Cancellazione gratuita fino a 2 ore prima
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── PAYMENT SCREEN ── */
+function PaymentScreen({ treatment: t, onConfirm, onBack }) {
+  const [method, setMethod] = useState('card'); // 'card' | 'apple' | 'google' | 'klarna'
+  const [card, setCard] = useState({ number:'', expiry:'', cvv:'', name:'' });
+  const [promo, setPromo] = useState('');
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoError, setPromoError] = useState(false);
+  const [paying, setPaying] = useState(false);
+
+  const discount = promoApplied ? Math.round(t.price * 0.15) : 0;
+  const serviceFee = 2;
+  const total = t.price - discount + serviceFee;
+
+  function formatCard(v) {
+    return v.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
+  }
+  function formatExpiry(v) {
+    return v.replace(/\D/g,'').slice(0,4).replace(/^(\d{2})(\d)/,'$1/$2');
+  }
+
+  function applyPromo() {
+    if (promo.toUpperCase() === 'KAUMA15') {
+      setPromoApplied(true); setPromoError(false);
+    } else {
+      setPromoError(true); setPromoApplied(false);
+    }
+  }
+
+  function handlePay() {
+    setPaying(true);
+    setTimeout(() => { setPaying(false); onConfirm(); }, 1800);
+  }
+
+  const methods = [
+    { id:'card',   label:'Carta',       icon: (
+      <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+        <rect x=".5" y=".5" width="19" height="13" rx="1.5" stroke="currentColor" strokeWidth="1"/>
+        <path d="M0 4h20" stroke="currentColor" strokeWidth="1.5"/>
+        <rect x="2" y="7" width="5" height="2" rx=".5" fill="currentColor"/>
+      </svg>
+    )},
+    { id:'apple',  label:'Apple Pay',   icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M12 2.5c.8-1 .75-2.4.75-2.4s-1.3.1-2.1 1c-.75.85-.7 2.1-.7 2.1S11.2 3.5 12 2.5z" fill="currentColor"/>
+        <path d="M14.5 9.5c0-2.5-2-3.5-3-3.5S9.5 7 8.5 7s-1.8-.9-3-.9C3.5 6.1 1 8.3 1 12c0 3.3 2.2 6 4 6 .9 0 1.5-.6 2.5-.6s1.7.6 2.7.6c1.9 0 3.8-2.8 4.3-5.2-.9-.4-2-1.4-2-2.8z" fill="currentColor"/>
+      </svg>
+    )},
+    { id:'google', label:'Google Pay',  icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r="8" stroke="currentColor" strokeWidth="1"/>
+        <text x="9" y="13" textAnchor="middle" fontSize="8" fontFamily="sans-serif" fill="currentColor" fontWeight="600">G</text>
+      </svg>
+    )},
+    { id:'klarna', label:'Klarna',      icon: (
+      <svg width="28" height="14" viewBox="0 0 28 14" fill="none">
+        <rect width="28" height="14" rx="3" fill="currentColor" opacity="0.12"/>
+        <text x="14" y="10.5" textAnchor="middle" fontSize="7.5" fontFamily="sans-serif" fill="currentColor" fontWeight="600" letterSpacing="0.5">klarna</text>
+      </svg>
+    )},
+  ];
+
+  return (
+    <div className="screen-scroll" style={{ background:C.cream }}>
+      {/* Header */}
+      <div style={{ padding:'16px 20px 14px', background:C.cream, borderBottom:`1px solid ${C.linen}`, display:'flex', alignItems:'center', gap:14, position:'sticky', top:0, zIndex:10 }}>
+        <div onClick={onBack} style={{ cursor:'pointer' }}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M9 2L4 7l5 5" stroke={C.espresso} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:12, letterSpacing:'0.38em', color:C.espresso, textTransform:'uppercase' }}>
+          PAGAMENTO
+        </div>
+        {/* Lock icon */}
+        <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:5 }}>
+          <svg width="11" height="13" viewBox="0 0 11 13" fill="none">
+            <rect x="1" y="5.5" width="9" height="7" rx="1.2" stroke={C.caramel} strokeWidth="1"/>
+            <path d="M3 5.5V4a2.5 2.5 0 015 0v1.5" stroke={C.caramel} strokeWidth="1" strokeLinecap="round"/>
+            <circle cx="5.5" cy="9" r="1" fill={C.caramel}/>
+          </svg>
+          <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:9.5, color:C.caramel, letterSpacing:'0.06em' }}>Sicuro</div>
+        </div>
+      </div>
+
+      <div style={{ padding:'20px 20px', display:'flex', flexDirection:'column', gap:22, paddingBottom:24 }}>
+
+        {/* Order summary */}
+        <div style={{ background:C.sand, border:`1px solid ${C.linen}`, borderRadius:3, padding:'16px 18px' }}>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:12, paddingLeft:'0.38em' }}>RIEPILOGO</div>
+          <div style={{ display:'flex', gap:12, alignItems:'center', marginBottom:14 }}>
+            <div className="img-placeholder" style={{ width:44, height:44, borderRadius:2, background:t.color, flexShrink:0 }}>
+              <span style={{ fontSize:7 }}>foto</span>
+            </div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:17, color:C.espresso }}>{t.name}</div>
+              <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', marginTop:2 }}>{t.salon} · {t.duration}</div>
+            </div>
+          </div>
+          <div style={{ height:1, background:C.linen, marginBottom:12 }} />
+          {/* Price breakdown */}
+          {[
+            { label:'Trattamento', value:`€${t.price}` },
+            ...(promoApplied ? [{ label:'Promo KAUMA15 −15%', value:`−€${discount}`, accent:true }] : []),
+            { label:'Commissione servizio', value:`€${serviceFee}` },
+          ].map((r,i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+              <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:12, color: r.accent ? C.caramel : 'rgba(44,31,20,0.55)' }}>{r.label}</div>
+              <div style={{ fontFamily:"'DM Sans'", fontWeight: r.accent ? 500 : 300, fontSize:12, color: r.accent ? C.caramel : 'rgba(44,31,20,0.7)' }}>{r.value}</div>
+            </div>
+          ))}
+          <div style={{ height:1, background:C.linen, margin:'8px 0 12px' }} />
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+            <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.32em', color:C.espresso, textTransform:'uppercase' }}>TOTALE</div>
+            <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:500, fontSize:22, color:C.espresso }}>€{total}</div>
+          </div>
+        </div>
+
+        {/* Promo code */}
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:10, paddingLeft:'0.38em' }}>CODICE PROMO</div>
+          <div style={{ display:'flex', gap:8 }}>
+            <input
+              value={promo}
+              onChange={e => { setPromo(e.target.value.toUpperCase()); setPromoError(false); setPromoApplied(false); }}
+              placeholder="es. KAUMA15"
+              style={{ flex:1, background:'transparent', border:'none', borderBottom:`1px solid ${promoError ? '#c0504a' : promoApplied ? '#7cb87c' : C.linen}`, color:C.espresso, fontFamily:"'DM Sans'", fontWeight:300, fontSize:13.5, padding:'8px 0', outline:'none', letterSpacing:'0.05em' }}
+            />
+            <div onClick={applyPromo} style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9.5, letterSpacing:'0.3em', textTransform:'uppercase', color:C.espresso, border:`1px solid ${C.linen}`, borderRadius:2, padding:'8px 14px', cursor:'pointer', alignSelf:'flex-end', whiteSpace:'nowrap' }}>
+              Applica
+            </div>
+          </div>
+          {promoApplied && <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10.5, color:'#7cb87c', marginTop:6 }}>✓ Sconto del 15% applicato</div>}
+          {promoError && <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10.5, color:'#c0504a', marginTop:6 }}>Codice non valido</div>}
+          {!promoApplied && !promoError && <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:'rgba(44,31,20,0.3)', marginTop:6 }}>Prova KAUMA15 per un 15% di sconto</div>}
+        </div>
+
+        {/* Payment methods */}
+        <div>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:12, paddingLeft:'0.38em' }}>METODO DI PAGAMENTO</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+            {methods.map(m => (
+              <div key={m.id} onClick={() => setMethod(m.id)} style={{
+                display:'flex', alignItems:'center', gap:10, padding:'12px 14px',
+                borderRadius:2, cursor:'pointer',
+                background: method===m.id ? C.espresso : C.sand,
+                border:`1px solid ${method===m.id ? C.espresso : C.linen}`,
+                color: method===m.id ? C.cream : C.espresso,
+                transition:'all 0.15s',
+              }}>
+                {m.icon}
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:12 }}>{m.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Card form */}
+        {method === 'card' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+            <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', paddingLeft:'0.38em' }}>DATI CARTA</div>
+
+            {/* Card preview */}
+            <div style={{
+              background:`linear-gradient(135deg, ${C.espresso} 0%, #4a2e1c 100%)`,
+              borderRadius:8, padding:'20px 22px', color:C.cream, position:'relative', overflow:'hidden',
+              minHeight:100,
+            }}>
+              <div style={{ position:'absolute', top:-20, right:-20, width:120, height:120, borderRadius:'50%', background:'rgba(201,168,130,0.08)' }} />
+              <div style={{ position:'absolute', bottom:-30, right:20, width:90, height:90, borderRadius:'50%', background:'rgba(201,168,130,0.05)' }} />
+              <Arch size={20} color="rgba(201,168,130,0.35)" />
+              <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:15, letterSpacing:'0.18em', marginTop:14, minHeight:22 }}>
+                {card.number || '•••• •••• •••• ••••'}
+              </div>
+              <div style={{ display:'flex', justifyContent:'space-between', marginTop:10 }}>
+                <div>
+                  <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:8, color:'rgba(250,247,242,0.45)', letterSpacing:'0.12em', marginBottom:2 }}>INTESTATARIO</div>
+                  <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(250,247,242,0.85)' }}>{card.name || '—'}</div>
+                </div>
+                <div style={{ textAlign:'right' }}>
+                  <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:8, color:'rgba(250,247,242,0.45)', letterSpacing:'0.12em', marginBottom:2 }}>SCADENZA</div>
+                  <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(250,247,242,0.85)' }}>{card.expiry || '—'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fields */}
+            {[
+              { label:'NUMERO CARTA', key:'number', placeholder:'1234 5678 9012 3456', format: formatCard, type:'tel' },
+              { label:'INTESTATARIO', key:'name',   placeholder:'Nome Cognome', format: v=>v, type:'text' },
+            ].map(f => (
+              <div key={f.key}>
+                <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.14em', color:C.caramel, textTransform:'uppercase', marginBottom:8 }}>{f.label}</div>
+                <input
+                  type={f.type} placeholder={f.placeholder}
+                  value={card[f.key]}
+                  onChange={e => setCard(c => ({ ...c, [f.key]: f.format(e.target.value) }))}
+                  style={{ width:'100%', background:'transparent', border:'none', borderBottom:`1px solid ${C.linen}`, color:C.espresso, fontFamily:"'DM Sans'", fontWeight:300, fontSize:13.5, padding:'8px 0', outline:'none', letterSpacing:'0.04em' }}
+                />
+              </div>
+            ))}
+            <div style={{ display:'flex', gap:16 }}>
+              {[
+                { label:'SCADENZA', key:'expiry', placeholder:'MM/AA', format:formatExpiry },
+                { label:'CVV', key:'cvv', placeholder:'•••', format: v=>v.slice(0,3) },
+              ].map(f => (
+                <div key={f.key} style={{ flex:1 }}>
+                  <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.14em', color:C.caramel, textTransform:'uppercase', marginBottom:8 }}>{f.label}</div>
+                  <input
+                    type="tel" placeholder={f.placeholder}
+                    value={card[f.key]}
+                    onChange={e => setCard(c => ({ ...c, [f.key]: f.format(e.target.value) }))}
+                    style={{ width:'100%', background:'transparent', border:'none', borderBottom:`1px solid ${C.linen}`, color:C.espresso, fontFamily:"'DM Sans'", fontWeight:300, fontSize:13.5, padding:'8px 0', outline:'none', letterSpacing:'0.06em' }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Non-card method placeholder */}
+        {method !== 'card' && (
+          <div style={{ background:C.sand, border:`1px solid ${C.linen}`, borderRadius:3, padding:'20px', textAlign:'center' }}>
+            <div style={{ fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontWeight:300, fontSize:16, color:C.espresso, marginBottom:6 }}>
+              {method === 'apple' ? 'Usa Face ID o Touch ID per confermare' : method === 'google' ? 'Verrai reindirizzato a Google Pay' : 'Paga in 3 rate senza interessi'}
+            </div>
+            <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.4)' }}>
+              {method === 'klarna' ? `3 × €${Math.round(total/3)} al mese` : 'Il metodo di pagamento è già salvato'}
+            </div>
+          </div>
+        )}
+
+        {/* Pay CTA */}
+        <button onClick={handlePay} disabled={paying} style={{
+          width:'100%', background: paying ? C.nude : C.espresso,
+          color:C.cream, border:'none', borderRadius:2, cursor: paying ? 'default' : 'pointer',
+          fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:11, letterSpacing:'0.18em',
+          textTransform:'uppercase', padding:'16px 0 16px 8px',
+          transition:'background 0.2s',
+          display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+        }}>
+          {paying ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation:'spin 1s linear infinite' }}>
+                <circle cx="7" cy="7" r="5.5" stroke="rgba(250,247,242,0.3)" strokeWidth="1.5"/>
+                <path d="M7 1.5a5.5 5.5 0 015.5 5.5" stroke={C.cream} strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              Elaborazione…
+            </>
+          ) : `Paga €${total}`}
+        </button>
+
+        <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:'rgba(44,31,20,0.3)', textAlign:'center', lineHeight:1.7, paddingBottom:12 }}>
+          Pagamento protetto da crittografia SSL · Cancellazione gratuita fino a 2 ore prima
+        </div>
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+function ConfirmationScreen({ treatment: t, onHome }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setTimeout(() => setMounted(true), 80); }, []);
+
+  return (
+    <div style={{
+      width:'100%', height:'100%', background:C.cream,
+      display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+      padding:'32px 28px', gap:0, textAlign:'center',
+    }}>
+      {/* Arch glow */}
+      <div style={{
+        opacity: mounted ? 1 : 0, transform: mounted ? 'scale(1)' : 'scale(0.85)',
+        transition:'all 0.5s cubic-bezier(0.34,1.56,0.64,1)',
+        marginBottom:28,
+      }}>
+        <Arch size={56} color={C.espresso} />
+      </div>
+
+      <div style={{
+        opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)',
+        transition:'all 0.45s ease 0.18s',
+        display:'flex', flexDirection:'column', gap:8, marginBottom:28,
+      }}>
+        <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9.5, letterSpacing:'0.18em', color:C.caramel, textTransform:'uppercase', paddingLeft:'0.44em' }}>
+          PRENOTAZIONE CONFERMATA
+        </div>
+        <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:300, fontStyle:'italic', fontSize:30, color:C.espresso, lineHeight:1.2 }}>
+          {t.name}
+        </div>
+        <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:13, color:'rgba(44,31,20,0.5)' }}>
+          {t.salon}
+        </div>
+      </div>
+
+      {/* Detail box */}
+      <div style={{
+        opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)',
+        transition:'all 0.45s ease 0.3s',
+        width:'100%', background:C.sand, border:`1px solid ${C.linen}`,
+        borderRadius:3, padding:'20px 22px', marginBottom:32,
+      }}>
+        {[
+          { label:'DATA', value:'Oggi, Giovedì 24 Aprile' },
+          { label:'ORARIO', value:'15:15' },
+          { label:'DURATA', value:t.duration },
+          { label:'PREZZO', value:`€${t.price}` },
+        ].map((r,i) => (
+          <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', padding:'9px 0', borderBottom: i<3 ? `1px solid ${C.linen}` : 'none' }}>
+            <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.34em', color:C.caramel, textTransform:'uppercase' }}>{r.label}</div>
+            <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso }}>{r.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Actions */}
+      <div style={{
+        opacity: mounted ? 1 : 0, transition:'opacity 0.4s ease 0.45s',
+        width:'100%', display:'flex', flexDirection:'column', gap:10,
+      }}>
+        <button style={{
+          width:'100%', background:C.espresso, color:C.cream,
+          border:'none', borderRadius:2, cursor:'pointer',
+          fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.4em',
+          textTransform:'uppercase', padding:'14px 0 14px 8px',
+        }}>Aggiungi al Calendario</button>
+        <button onClick={onHome} style={{
+          width:'100%', background:'transparent', color:C.espresso,
+          border:`1px solid ${C.linen}`, borderRadius:2, cursor:'pointer',
+          fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.4em',
+          textTransform:'uppercase', padding:'14px 0 14px 8px',
+        }}>Torna alla Home</button>
+      </div>
+
+      <div style={{
+        opacity: mounted ? 1 : 0, transition:'opacity 0.4s ease 0.55s',
+        fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontWeight:300,
+        fontSize:12, color:'rgba(44,31,20,0.3)', marginTop:22,
+      }}>
+        A presto, Kauma ti aspetta.
+      </div>
+    </div>
+  );
+}
+
+/* ── SEARCH / MAP SCREEN ── */
+function SearchScreen() {
+  const [selectedPin, setSelectedPin] = useState(null);
+  const [viewMode, setViewMode] = useState('map'); // 'map' | 'list'
+  const [query, setQuery] = useState('');
+  const [sheetOpen, setSheetOpen] = useState(true);
+  const [radius, setRadius] = useState(1); // km
+
+  // user center in SVG coords
+  const USER_X = 158, USER_Y = 168;
+  // scale: roughly 1km = 55px in this SVG
+  const KM_TO_PX = 55;
+
+  // Map pins — pixel coords within the SVG viewBox 0 0 320 340
+  const pins = [
+    { ...treatments[0], x:112, y:88,  cat:'V' },
+    { ...treatments[1], x:88,  y:218, cat:'M' },
+    { ...treatments[2], x:210, y:152, cat:'S' },
+    { ...treatments[3], x:155, y:62,  cat:'C' },
+    // Wellness partners
+    { id:'w1', name:'Studio Forma',       salon:'Pilates',          zone:'Brera, Milano',      category:'PILATES',   distance:'0.4 km', price:28, available:'Oggi, 07:30', x:118, y:105, cat:'P', color:'#ede5da', desc:'Studio pilates premium a Brera.' },
+    { id:'w2', name:'Spazio Yoga Milano', salon:'Yoga',             zone:'Navigli, Milano',    category:'YOGA',      distance:'0.7 km', price:20, available:'Oggi, 08:00', x:82,  y:200, cat:'Y', color:'#e5ddd4', desc:'Centro yoga nel cuore dei Navigli.' },
+    { id:'w3', name:'Atelier Corpo',      salon:'Personal Training',zone:'Porta Venezia, Milano',category:'P.T.',    distance:'1.0 km', price:65, available:'Oggi, 09:00', x:218, y:140, cat:'PT',color:'#ddd5ca', desc:'Personal trainer certificati.' },
+  ];
+
+  const filtered = pins.filter(p => {
+    const dx = p.x - USER_X, dy = p.y - USER_Y;
+    const distPx = Math.sqrt(dx*dx + dy*dy);
+    const distKm = distPx / KM_TO_PX;
+    const inRadius = distKm <= radius;
+    const matchQuery = query === '' ||
+      p.name.toLowerCase().includes(query.toLowerCase()) ||
+      p.category?.toLowerCase().includes(query.toLowerCase()) ||
+      p.zone?.toLowerCase().includes(query.toLowerCase());
+    return inRadius && matchQuery;
+  });
+
+  const sel = selectedPin !== null ? filtered.find(p => p.id === selectedPin) : null;
+
+  return (
+    <div style={{ width:'100%', height:'100%', background:C.cream, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+
+      {/* Header */}
+      <div style={{ padding:'14px 16px 10px', background:C.cream, borderBottom:`1px solid ${C.linen}`, flexShrink:0, zIndex:20 }}>
+        {/* Search input */}
+        <div style={{ background:C.sand, borderRadius:2, padding:'10px 14px', display:'flex', alignItems:'center', gap:10, border:`1px solid ${C.linen}`, marginBottom:10 }}>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <circle cx="5.5" cy="5.5" r="4" stroke={C.caramel} strokeWidth="1.2"/>
+            <path d="M9 9l2.5 2.5" stroke={C.caramel} strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Trattamento, zona, salone…"
+            style={{ flex:1, background:'transparent', border:'none', outline:'none', fontFamily:"'DM Sans'", fontWeight:300, fontSize:13, color:C.espresso }}
+          />
+          {query && <div onClick={() => setQuery('')} style={{ color:C.nude, cursor:'pointer', fontSize:14, lineHeight:1 }}>✕</div>}
+        </div>
+        {/* Toggle + radius */}
+        <div style={{ display:'flex', gap:8, alignItems:'center', justifyContent:'space-between' }}>
+          <GeoTag zone="Milano · posizione attuale" small />
+          <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+            {/* Radius selector */}
+            <div style={{ display:'flex', gap:4 }}>
+              {[0.5, 1, 2, 5].map(r => (
+                <div key={r} onClick={() => { setRadius(r); setSelectedPin(null); }} style={{
+                  fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.22em',
+                  textTransform:'uppercase', cursor:'pointer',
+                  padding:'4px 9px',
+                  borderRadius:20,
+                  background: radius===r ? C.espresso : 'transparent',
+                  color: radius===r ? C.cream : 'rgba(44,31,20,0.45)',
+                  border:`1px solid ${radius===r ? C.espresso : C.linen}`,
+                  transition:'all 0.15s',
+                }}>{r}km</div>
+              ))}
+            </div>
+            <div style={{ width:1, height:16, background:C.linen }} />
+            {/* Map/List toggle */}
+            <div style={{ display:'flex', background:C.linen, borderRadius:2, overflow:'hidden', border:`1px solid ${C.linen}` }}>
+              {[['map','Mappa'],['list','Lista']].map(([id,label]) => (
+                <div key={id} onClick={() => setViewMode(id)} style={{
+                  padding:'5px 12px', cursor:'pointer',
+                  background: viewMode===id ? C.espresso : 'transparent',
+                  fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.3em',
+                  textTransform:'uppercase', color: viewMode===id ? C.cream : 'rgba(44,31,20,0.5)',
+                }}>{label}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MAP VIEW */}
+      {viewMode === 'map' && (
+        <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
+          {/* SVG Map */}
+                    <div style={{ position:'relative', width:'100%', height:'100%' }}>
+            <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=9.00%2C45.50%2C9.35%2C45.75&layer=mapnik" style={{ width:'100%', height:'100%', border:'none' }} title="Mappa Kauma" loading="lazy" />
+            <div style={{ position:'absolute', top:12, left:12, background:'rgba(250,247,242,0.92)', borderRadius:6, padding:'6px 12px', fontFamily:"'DM Sans'", fontWeight:400, fontSize:11, color:'#3A2C1E', zIndex:10, border:'1px solid #E8DDD0' }}>Brianza · Como</div>
+          </div>
+
+          {/* Selected pin card */}
+          {sel && (
+            <div style={{
+              position:'absolute', bottom:0, left:0, right:0,
+              background:C.cream, borderTop:`1px solid ${C.linen}`,
+              padding:'16px 18px 24px',
+              boxShadow:'0 -4px 20px rgba(44,31,20,0.08)',
+              zIndex:10,
+            }}>
+              <div style={{ display:'flex', gap:14, alignItems:'flex-start' }}>
+                <div className="img-placeholder" style={{ width:52, height:52, borderRadius:2, background:sel.color || C.linen, flexShrink:0 }}>
+                  <span style={{ fontSize:7 }}>foto</span>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.34em', color:C.caramel, textTransform:'uppercase', marginBottom:4, paddingLeft:'0.34em' }}>
+                    {sel.category || sel.cat} · {sel.distance}
+                  </div>
+                  <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:17, color:C.espresso, marginBottom:4 }}>{sel.name}</div>
+                  <GeoTag zone={sel.zone} small />
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:8, flexShrink:0 }}>
+                  <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:17, color:C.espresso }}>€{sel.price}</div>
+                  <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.3em', textTransform:'uppercase', color:C.cream, background:C.espresso, borderRadius:2, padding:'6px 12px', cursor:'pointer' }}>
+                    Prenota
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', marginTop:8, lineHeight:1.6 }}>
+                {sel.available}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* LIST VIEW */}
+      {viewMode === 'list' && (
+        <div className="screen-scroll" style={{ flex:1, padding:'16px 18px', display:'flex', flexDirection:'column', gap:10, paddingBottom:80 }}>
+          <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10.5, color:'rgba(44,31,20,0.4)', marginBottom:4 }}>
+            {filtered.length} risultati entro {radius} km
+          </div>
+          {filtered.map(p => (
+            <div key={p.id} style={{ display:'flex', gap:12, padding:'14px 16px', background:'#fff', border:`1px solid ${C.linen}`, borderRadius:3, boxShadow:'0 2px 8px rgba(44,31,20,0.04)', cursor:'pointer' }}>
+              <div className="img-placeholder" style={{ width:52, height:52, borderRadius:2, background:p.color || C.linen, flexShrink:0 }}>
+                <span style={{ fontSize:7 }}>foto</span>
+              </div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.34em', color:C.caramel, textTransform:'uppercase', marginBottom:4, paddingLeft:'0.34em' }}>{p.category || 'WELLNESS'} · {p.distance}</div>
+                <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso, marginBottom:4 }}>{p.name}</div>
+                <GeoTag zone={p.zone} small />
+              </div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso, flexShrink:0, alignSelf:'center' }}>€{p.price}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+function WellnessScreen() {
+  const [activeType, setActiveType] = useState('Tutti');
+  const [expanded, setExpanded] = useState('w1');
+  const [bookedClass, setBookedClass] = useState(null);
+  const [confirmAnim, setConfirmAnim] = useState(false);
+
+  const types = ['Tutti', 'Pilates', 'Yoga', 'Personal'];
+  const filtered = wellnessPartners.filter(p =>
+    activeType === 'Tutti' ||
+    p.type.toLowerCase().includes(activeType.toLowerCase())
+  );
+
+  function bookClass(cls) {
+    setBookedClass(cls);
+    setTimeout(() => setConfirmAnim(true), 60);
+  }
+
+  if (bookedClass) {
+    return (
+      <div style={{ width:'100%', height:'100%', background:C.cream, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'32px 26px', textAlign:'center', gap:0 }}>
+        <div style={{ opacity: confirmAnim ? 1 : 0, transform: confirmAnim ? 'scale(1)' : 'scale(0.8)', transition:'all 0.45s cubic-bezier(0.34,1.56,0.64,1)', marginBottom:24 }}>
+          <Arch size={48} color={C.espresso} />
+        </div>
+        <div style={{ opacity: confirmAnim ? 1 : 0, transform: confirmAnim ? 'translateY(0)' : 'translateY(10px)', transition:'all 0.4s ease 0.15s', display:'flex', flexDirection:'column', gap:6, marginBottom:24 }}>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.18em', color:C.caramel, textTransform:'uppercase', paddingLeft:'0.44em' }}>CLASSE PRENOTATA</div>
+          <div style={{ fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontWeight:300, fontSize:26, color:C.espresso }}>{bookedClass.name}</div>
+          <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:12, color:'rgba(44,31,20,0.45)' }}>con {bookedClass.teacher}</div>
+        </div>
+        <div style={{ opacity: confirmAnim ? 1 : 0, transition:'opacity 0.4s ease 0.28s', width:'100%', background:C.sand, border:`1px solid ${C.linen}`, borderRadius:3, padding:'18px 20px', marginBottom:28 }}>
+          {[
+            { label:'ORARIO', value: `Oggi, ${bookedClass.time}` },
+            { label:'DURATA', value: bookedClass.duration },
+            { label:'PREZZO', value: `€${bookedClass.price}` },
+          ].map((r,i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', padding:'8px 0', borderBottom: i<2 ? `1px solid ${C.linen}` : 'none' }}>
+              <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.34em', color:C.caramel, textTransform:'uppercase' }}>{r.label}</div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso }}>{r.value}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ opacity: confirmAnim ? 1 : 0, transition:'opacity 0.4s ease 0.38s', width:'100%' }}>
+          <button onClick={() => { setBookedClass(null); setConfirmAnim(false); }} style={{
+            width:'100%', background:C.espresso, color:C.cream, border:'none', borderRadius:2, cursor:'pointer',
+            fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.4em',
+            textTransform:'uppercase', padding:'14px 0 14px 8px',
+          }}>Torna al Benessere</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="screen-scroll" style={{ background:C.cream }}>
+      {/* Header */}
+      <div style={{ padding:'16px 20px 14px', background:C.cream, borderBottom:`1px solid ${C.linen}`, position:'sticky', top:0, zIndex:10 }}>
+        <Logo size={15} color={C.espresso} />
+      </div>
+
+      {/* Hero */}
+      <div style={{ padding:'22px 20px 18px' }}>
+        <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:12, letterSpacing:'0.06em', color:C.caramel, marginBottom:6 }}>
+          Oggi · Classi disponibili
+        </div>
+        <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:300, fontSize:28, color:C.espresso, lineHeight:1.2 }}>
+          Movimento &<br /><span style={{ fontStyle:'italic' }}>benessere.</span>
+        </div>
+      </div>
+
+      {/* Filter pills */}
+      <div style={{ paddingLeft:20, marginBottom:20, display:'flex', gap:8, overflowX:'auto' }}>
+        {types.map((t,i) => (
+          <div key={i} onClick={() => setActiveType(t)} style={{
+            fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.32em',
+            textTransform:'uppercase', paddingLeft:'0.32em',
+            color: activeType===t ? C.cream : C.espresso,
+            background: activeType===t ? C.espresso : 'transparent',
+            border:`1px solid ${activeType===t ? C.espresso : C.linen}`,
+            borderRadius:20, padding:'7px 16px', whiteSpace:'nowrap', cursor:'pointer', flexShrink:0,
+          }}>{t}</div>
+        ))}
+      </div>
+
+      {/* Partner list */}
+      <div style={{ padding:'0 20px', display:'flex', flexDirection:'column', gap:12, paddingBottom:90 }}>
+        {filtered.map(partner => (
+          <div key={partner.id} style={{ border:`1px solid ${C.linen}`, borderRadius:3, overflow:'hidden', background:'#fff', boxShadow:'0 2px 10px rgba(44,31,20,0.05)' }}>
+            {/* Partner header */}
+            <div onClick={() => setExpanded(expanded===partner.id ? null : partner.id)}
+              style={{ padding:'16px 18px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer', background: expanded===partner.id ? C.sand : '#fff' }}>
+              <div>
+                <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.14em', color:C.caramel, textTransform:'uppercase', marginBottom:5, paddingLeft:'0.36em' }}>{partner.type}</div>
+                <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:18, color:C.espresso, lineHeight:1.2 }}>{partner.name}</div>
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', marginTop:3 }}>{partner.location}</div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ transform: expanded===partner.id ? 'rotate(180deg)' : 'none', transition:'transform 0.2s', flexShrink:0 }}>
+                <path d="M2 5l5 5 5-5" stroke={C.caramel} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+
+            {/* Classes */}
+            {expanded === partner.id && (
+              <div style={{ borderTop:`1px solid ${C.linen}` }}>
+                {partner.classes.map((cls, i) => (
+                  <div key={cls.id} style={{ padding:'14px 18px', borderBottom: i<partner.classes.length-1 ? `1px solid ${C.linen}` : 'none', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso, marginBottom:3 }}>{cls.name}</div>
+                      <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', lineHeight:1.6 }}>
+                        {cls.teacher} · {cls.duration}<br/>
+                        <span style={{ color: cls.spots <= 2 ? '#a07850' : 'rgba(44,31,20,0.35)' }}>
+                          {cls.spots === 1 ? '⚠ Ultimo posto' : `${cls.spots} posti`}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:8, marginLeft:12, flexShrink:0 }}>
+                      <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:14, letterSpacing:'0.06em', color:C.espresso }}>{cls.time}</div>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:14, color:'rgba(44,31,20,0.5)' }}>€{cls.price}</div>
+                        <div onClick={() => bookClass(cls)} style={{
+                          fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.3em',
+                          textTransform:'uppercase', paddingLeft:'0.3em',
+                          color:C.cream, background:C.espresso,
+                          border:'none', borderRadius:2, padding:'6px 12px', cursor:'pointer',
+                        }}>Prenota</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── GEO TAG component ── */
+function GeoTag({ zone, small=false }) {
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+      <svg width={small?10:11} height={small?10:11} viewBox="0 0 11 11" fill="none">
+        <circle cx="5.5" cy="4.5" r="2" stroke={C.caramel} strokeWidth="1"/>
+        <path d="M5.5 1v.5M5.5 7.5v.5M1 4.5h.5M9 4.5h.5" stroke={C.caramel} strokeWidth="0.8" strokeLinecap="round"/>
+        <path d="M5.5 7C3.5 9.5 2 10 2 10s3.5-1 3.5-3z" fill={C.caramel} opacity="0.4"/>
+        <path d="M3.5 8.5C3.5 8.5 5.5 7 5.5 4.5" stroke={C.caramel} strokeWidth="0.9" strokeLinecap="round"/>
+      </svg>
+      <span style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:small?9.5:10.5, color:C.caramel, letterSpacing:'0.03em' }}>{zone}</span>
+    </div>
+  );
+}
+
+/* ── PROFILE SCREEN ── */
+function ProfileScreen() {
+  const [mode, setMode] = useState('user'); // 'user' | 'centro'
+  const [slotForm, setSlotForm] = useState(false);
+  const [waDemo, setWaDemo] = useState(false);
+  const [waStep, setWaStep] = useState(0);
+  const [newSlot, setNewSlot] = useState({ service:'', date:'', time:'', price:'' });
+  const [addedSlots, setAddedSlots] = useState([
+    { service:'Gel Naturale', date:'Oggi', time:'14:30', price:'55' },
+    { service:'Piega & Styling', date:'Oggi', time:'16:00', price:'60' },
+  ]);
+
+  const waMessages = [
+    { from:'centro', text:'Ciao Kauma! Domani ho disponibile:\n- Facial Glow ore 10:00 €75\n- Manicure Gel ore 14:30 €55\n- Massaggio 60min ore 16:00 €90' },
+    { from:'agent', text:'✓ Ho elaborato i tuoi slot per domani 25 Aprile:' },
+    { from:'agent', text:'📍 Atelier Luce · Brera, Milano\n→ Facial Glow · 10:00 · €75\n→ Manicure Gel · 14:30 · €55\n→ Massaggio · 16:00 · €90\n\nCarico tutto sull\'app?' },
+    { from:'centro', text:'Sì, conferma!' },
+    { from:'agent', text:'✅ Perfetto! 3 slot pubblicati su Kauma. Riceverai notifica per ogni prenotazione.' },
+  ];
+
+  useEffect(() => {
+    if (!waDemo) { setWaStep(0); return; }
+    if (waStep >= waMessages.length) return;
+    const t = setTimeout(() => setWaStep(s => s+1), waStep === 0 ? 400 : 1100);
+    return () => clearTimeout(t);
+  }, [waDemo, waStep]);
+
+  return (
+    <div className="screen-scroll" style={{ background:C.cream }}>
+      {/* Header */}
+      <div style={{ padding:'16px 20px 14px', background:C.cream, borderBottom:`1px solid ${C.linen}`, position:'sticky', top:0, zIndex:10 }}>
+        <Logo size={15} color={C.espresso} />
+      </div>
+
+      {/* Mode toggle */}
+      <div style={{ padding:'20px 20px 0' }}>
+        <div style={{ display:'flex', background:C.sand, borderRadius:2, padding:3, border:`1px solid ${C.linen}` }}>
+          {[['user','Utente'],['centro','Centro / Partner']].map(([id, label]) => (
+            <div key={id} onClick={() => setMode(id)} style={{
+              flex:1, textAlign:'center', padding:'9px 8px',
+              borderRadius:2, cursor:'pointer',
+              background: mode===id ? C.espresso : 'transparent',
+              fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9.5, letterSpacing:'0.32em',
+              textTransform:'uppercase', paddingLeft: mode===id ? '0.32em' : '0.32em',
+              color: mode===id ? C.cream : 'rgba(44,31,20,0.5)',
+              transition:'all 0.18s',
+            }}>{label}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── USER PROFILE ── */}
+      {mode === 'user' && (
+        <div style={{ padding:'24px 20px', display:'flex', flexDirection:'column', gap:22, paddingBottom:90 }}>
+          {/* Avatar */}
+          <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+            <div style={{ width:56, height:56, borderRadius:'50%', background:C.linen, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Arch size={20} color={C.espresso} />
+            </div>
+            <div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:20, color:C.espresso }}>Sofia Ricci</div>
+              <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', marginTop:2 }}>sofia@email.it · Milano</div>
+            </div>
+          </div>
+          <div style={{ height:1, background:C.linen }} />
+          {/* Stats */}
+          <div style={{ display:'flex', gap:0 }}>
+            {[{ n:'8', l:'Prenotazioni' }, { n:'3', l:'Preferiti' }, { n:'2', l:'Recensioni' }].map((s,i) => (
+              <div key={i} style={{ flex:1, textAlign:'center', borderRight: i<2 ? `1px solid ${C.linen}` : 'none' }}>
+                <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:26, color:C.espresso }}>{s.n}</div>
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:'rgba(44,31,20,0.4)', marginTop:2 }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ height:1, background:C.linen }} />
+          {/* Prossima prenotazione */}
+          <div>
+            <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:12, paddingLeft:'0.38em' }}>PROSSIMA PRENOTAZIONE</div>
+            <div style={{ background:C.sand, border:`1px solid ${C.linen}`, borderRadius:3, padding:'16px 18px' }}>
+              <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.34em', color:C.caramel, textTransform:'uppercase', marginBottom:6, paddingLeft:'0.34em' }}>DOMANI · 14:30</div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:18, color:C.espresso, marginBottom:4 }}>Gel Naturale</div>
+              <GeoTag zone="Studio Nudo · Navigli, Milano" />
+            </div>
+          </div>
+          {/* Impostazioni */}
+          <div>
+            <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:12, paddingLeft:'0.38em' }}>IMPOSTAZIONI</div>
+            {['Notifiche','Metodo di pagamento','Posizione','Lingua','Supporto'].map((item,i) => (
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'13px 0', borderBottom:`1px solid ${C.linen}` }}>
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:13.5, color:C.espresso }}>{item}</div>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M4 2l4 4-4 4" stroke={C.nude} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── CENTRO PROFILE ── */}
+      {mode === 'centro' && (
+        <div style={{ padding:'24px 20px', display:'flex', flexDirection:'column', gap:22, paddingBottom:90 }}>
+          {/* Centro info */}
+          <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+            <div style={{ width:56, height:56, borderRadius:4, background:C.linen, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Arch size={22} color={C.espresso} />
+            </div>
+            <div>
+              <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:20, color:C.espresso }}>Atelier Luce</div>
+              <GeoTag zone="Brera, Milano" />
+              <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:4 }}>
+                <div style={{ width:6, height:6, borderRadius:'50%', background:'#7cb87c' }} />
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10.5, color:'rgba(44,31,20,0.5)' }}>Partner verificato</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats centro */}
+          <div style={{ display:'flex', gap:0, background:C.sand, borderRadius:3, border:`1px solid ${C.linen}`, overflow:'hidden' }}>
+            {[{ n:'12', l:'Slot oggi' }, { n:'87%', l:'Occupazione' }, { n:'4.9', l:'Rating' }].map((s,i) => (
+              <div key={i} style={{ flex:1, textAlign:'center', padding:'16px 8px', borderRight: i<2 ? `1px solid ${C.linen}` : 'none' }}>
+                <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:24, color:C.espresso }}>{s.n}</div>
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:9.5, color:'rgba(44,31,20,0.4)', marginTop:2 }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── WHATSAPP AGENT ── */}
+          <div style={{ border:`1px solid ${C.linen}`, borderRadius:3, overflow:'hidden' }}>
+            <div style={{ padding:'14px 18px', background:'#25D366', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                <div>
+                  <div style={{ fontFamily:"'Josefin Sans'", fontWeight:300, fontSize:10, letterSpacing:'0.28em', color:'white', textTransform:'uppercase' }}>KAUMA AGENT</div>
+                  <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:'rgba(255,255,255,0.75)' }}>Carica slot via WhatsApp</div>
+                </div>
+              </div>
+              <div onClick={() => { setWaDemo(true); setWaStep(0); }} style={{
+                background:'rgba(255,255,255,0.2)', borderRadius:20, padding:'6px 14px', cursor:'pointer',
+                fontFamily:"'DM Sans'", fontWeight:400, fontSize:10.5, color:'white',
+              }}>Demo →</div>
+            </div>
+
+            {/* WA Chat demo */}
+            {waDemo && (
+              <div style={{ background:'#ece5dd', padding:'14px 14px', display:'flex', flexDirection:'column', gap:8, minHeight:160 }}>
+                {waMessages.slice(0, waStep).map((msg, i) => (
+                  <div key={i} style={{ display:'flex', justifyContent: msg.from==='centro' ? 'flex-end' : 'flex-start' }}>
+                    <div style={{
+                      maxWidth:'82%', padding:'8px 12px', borderRadius: msg.from==='centro' ? '12px 2px 12px 12px' : '2px 12px 12px 12px',
+                      background: msg.from==='centro' ? '#dcf8c6' : 'white',
+                      boxShadow:'0 1px 3px rgba(0,0,0,0.08)',
+                      fontFamily:"'DM Sans'", fontWeight:300, fontSize:11.5, color:'#111', lineHeight:1.65,
+                      whiteSpace:'pre-line',
+                    }}>
+                      {msg.from==='agent' && <div style={{ fontFamily:"'DM Sans'", fontWeight:500, fontSize:10, color:'#25D366', marginBottom:3 }}>Kauma Agent</div>}
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {waStep < waMessages.length && (
+                  <div style={{ display:'flex', justifyContent:'flex-start' }}>
+                    <div style={{ background:'white', borderRadius:'2px 12px 12px 12px', padding:'8px 16px', boxShadow:'0 1px 3px rgba(0,0,0,0.08)' }}>
+                      <div style={{ display:'flex', gap:4 }}>
+                        {[0,1,2].map(d => <div key={d} style={{ width:6, height:6, borderRadius:'50%', background:'#aaa', animation:`pulse${d} 1s infinite`, opacity: 0.5 + d*0.2 }} />)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!waDemo && (
+              <div style={{ padding:'16px 18px', background:'#faf7f2' }}>
+                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:12, color:'rgba(44,31,20,0.5)', lineHeight:1.75 }}>
+                  Invia un messaggio WhatsApp con i tuoi slot disponibili e il nostro agente AI li pubblica automaticamente su Kauma in pochi secondi.
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── SLOT MANUALI ── */}
+          <div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+              <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:9, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', paddingLeft:'0.38em' }}>SLOT PUBBLICATI · OGGI</div>
+              <div onClick={() => setSlotForm(f => !f)} style={{
+                fontFamily:"'DM Sans'", fontWeight:400, fontSize:11, color:C.espresso,
+                border:`1px solid ${C.linen}`, borderRadius:2, padding:'5px 12px', cursor:'pointer',
+              }}>+ Aggiungi</div>
+            </div>
+
+            {/* Add slot form */}
+            {slotForm && (
+              <div style={{ background:C.sand, border:`1px solid ${C.linen}`, borderRadius:3, padding:'16px 18px', marginBottom:12, display:'flex', flexDirection:'column', gap:14 }}>
+                {[
+                  { label:'SERVIZIO', key:'service', placeholder:'es. Facial, Manicure…' },
+                  { label:'DATA', key:'date', placeholder:'es. Oggi, Domani, 25/04' },
+                  { label:'ORARIO', key:'time', placeholder:'es. 14:30' },
+                  { label:'PREZZO €', key:'price', placeholder:'es. 65' },
+                ].map(f => (
+                  <div key={f.key}>
+                    <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:8.5, letterSpacing:'0.14em', color:C.caramel, textTransform:'uppercase', marginBottom:7 }}>{f.label}</div>
+                    <input
+                      value={newSlot[f.key]}
+                      onChange={e => setNewSlot(s => ({ ...s, [f.key]: e.target.value }))}
+                      placeholder={f.placeholder}
+                      style={{ width:'100%', background:'transparent', border:'none', borderBottom:`1px solid ${C.nude}`, color:C.espresso, fontFamily:"'DM Sans'", fontWeight:300, fontSize:13.5, padding:'6px 0', outline:'none' }}
+                    />
+                  </div>
+                ))}
+                <button onClick={() => {
+                  if (newSlot.service && newSlot.time) {
+                    setAddedSlots(s => [...s, { ...newSlot }]);
+                    setNewSlot({ service:'', date:'', time:'', price:'' });
+                    setSlotForm(false);
+                  }
+                }} style={{
+                  background:C.espresso, color:C.cream, border:'none', borderRadius:2, cursor:'pointer',
+                  fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.4em',
+                  textTransform:'uppercase', padding:'13px 0 13px 8px', marginTop:4,
+                }}>Pubblica Slot</button>
+              </div>
+            )}
+
+            {/* Slot list */}
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+              {addedSlots.map((s, i) => (
+                <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', background:'#fff', border:`1px solid ${C.linen}`, borderRadius:3 }}>
+                  <div>
+                    <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso }}>{s.service}</div>
+                    <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:'rgba(44,31,20,0.45)', marginTop:2 }}>{s.date || 'Oggi'} · {s.time}</div>
+                  </div>
+                  <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso }}>€{s.price}</div>
+                    <div style={{ width:6, height:6, borderRadius:'50%', background:'#7cb87c' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
+}
+function TabBar({ active, onChange }) {
+  const tabs = [
+    { id:'home', label:'Home', icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M2 8l7-6 7 6v8H12v-5H6v5H2V8z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+      </svg>
+    )},
+    { id:'search', label:'Cerca', icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="8" cy="8" r="5" stroke="currentColor" strokeWidth="1.2"/>
+        <path d="M12 12l3.5 3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+      </svg>
+    )},
+    { id:'wellness', label:'Benessere', icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 3 C9 3 4 6 4 10.5 A5 5 0 0 0 14 10.5 C14 6 9 3 9 3Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+        <path d="M9 10v5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+      </svg>
+    )},
+    { id:'profile', label:'Profilo', icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="6" r="3" stroke="currentColor" strokeWidth="1.2"/>
+        <path d="M3 16c0-3.31 2.69-6 6-6s6 2.69 6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+      </svg>
+    )},
+  ];
+  return (
+    <div style={{ display:'flex', background:C.cream, borderTop:`1px solid ${C.linen}`, paddingBottom:8 }}>
+      {tabs.map(tab => (
+        <div key={tab.id} onClick={() => onChange(tab.id)} style={{
+          flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+          paddingTop:10, cursor:'pointer',
+          color: active===tab.id ? C.espresso : 'rgba(44,31,20,0.28)',
+        }}>
+          {tab.icon}
+          <div style={{ fontFamily:"'DM Sans'", fontWeight: active===tab.id ? 400 : 300, fontSize:9, letterSpacing:'0.04em' }}>{tab.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
+   APP ROOT
+════════════════════════════════════════════ */
+function KaumaApp() {
+  const [screen, setScreen] = useState('splash');
+  const [selected, setSelected] = useState(null);
+  const [tab, setTab] = useState('home');
+
+  const showTabs = !['splash','detail','booking','payment','confirmation'].includes(screen);
+
+  function handleTab(id) {
+    setTab(id);
+    setScreen(id); // home, wellness, book, profile map directly to screens
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', height:'100%', overflow:'hidden' }}>
+      <div style={{ flex:1, overflow:'hidden', position:'relative' }}>
+        {screen === 'splash' && (
+          <SplashScreen onDone={() => setScreen('home')} />
+        )}
+        {screen === 'home' && (
+          <HomeScreen onSelect={t => { setSelected(t); setScreen('detail'); }} />
+        )}
+        {screen === 'search' && (
+          <SearchScreen />
+        )}
+        {screen === 'wellness' && (
+          <WellnessScreen />
+        )}
+        {screen === 'book' && (
+          <div style={{ width:'100%', height:'100%', background:C.cream, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:16, padding:32 }}>
+            <Arch size={36} color={C.espresso} />
+            <div style={{ fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontWeight:300, fontSize:22, color:C.espresso }}>Le tue prenotazioni</div>
+            <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:12, color:'rgba(44,31,20,0.4)', textAlign:'center', lineHeight:1.7 }}>Qui troverai lo storico e le prossime sessioni prenotate.</div>
+          </div>
+        )}
+        {screen === 'profile' && (
+          <ProfileScreen />
+        )}
+        {screen === 'detail' && selected && (
+          <DetailScreen
+            treatment={selected}
+            onBack={() => setScreen('home')}
+            onBook={() => setScreen('booking')}
+          />
+        )}
+        {screen === 'booking' && selected && (
+          <BookingScreen
+            treatment={selected}
+            onBack={() => setScreen('detail')}
+            onConfirm={() => setScreen('payment')}
+          />
+        )}
+        {screen === 'payment' && selected && (
+          <PaymentScreen
+            treatment={selected}
+            onBack={() => setScreen('booking')}
+            onConfirm={() => setScreen('confirmation')}
+          />
+        )}
+        {screen === 'confirmation' && selected && (
+          <ConfirmationScreen
+            treatment={selected}
+            onHome={() => { setScreen('home'); setTab('home'); }}
+          />
+        )}
+      </div>
+      {showTabs && <TabBar active={tab} onChange={handleTab} />}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
+   CANVAS
+════════════════════════════════════════════ */
+function App() {
+  return (
+    <div style={{ width:'100vw', height:'100vh', overflow:'hidden', background:'#faf7f2' }}>
+      <KaumaApp />
+    </div>
+  );
+}
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<div id="root"></div>
+</body>
+</html>
