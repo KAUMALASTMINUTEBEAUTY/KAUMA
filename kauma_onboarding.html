@@ -6,8 +6,7 @@
   <title>Kauma · Diventa Partner</title>
   <meta name="theme-color" content="#faf7f2">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Josefin+Sans:ital,wght@0,100;0,200;0,300;1,100&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Josefin+Sans:wght@100;200;300;400&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -21,380 +20,336 @@
       --espresso: #2c1f14;
     }
 
-    body {
-      background: var(--cream);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      color: var(--espresso);
-    }
+    body { background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--espresso); }
 
-    /* ── Header ── */
     header {
       background: var(--cream);
       border-bottom: 1px solid var(--linen);
-      padding: 22px 32px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .logo-arch {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
+      padding: 20px 28px;
+      display: flex; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 10;
     }
 
     .logo-text {
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 17px;
-      letter-spacing: 0.48em;
-      color: var(--espresso);
-      text-transform: uppercase;
-      padding-left: 0.48em;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 16px; letter-spacing: 0.48em; color: var(--espresso);
+      text-transform: uppercase; padding-left: 0.48em;
     }
 
-    /* ── Hero ── */
     .hero {
-      background: var(--sand);
-      border-bottom: 1px solid var(--linen);
-      padding: 56px 32px 52px;
-      text-align: center;
+      background: var(--sand); border-bottom: 1px solid var(--linen);
+      padding: 52px 28px 48px; text-align: center;
     }
 
     .hero-label {
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 10px;
-      letter-spacing: 0.4em;
-      color: var(--caramel);
-      text-transform: uppercase;
-      margin-bottom: 16px;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 10px; letter-spacing: 0.4em; color: var(--caramel);
+      text-transform: uppercase; margin-bottom: 14px;
     }
 
     .hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: clamp(32px, 5vw, 48px);
-      color: var(--espresso);
-      line-height: 1.2;
-      margin-bottom: 16px;
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: clamp(30px, 5vw, 46px); color: var(--espresso);
+      line-height: 1.2; margin-bottom: 14px;
     }
 
-    .hero h1 em {
-      font-style: italic;
-    }
+    .hero h1 em { font-style: italic; }
 
     .hero p {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 15px;
-      color: var(--brown);
-      line-height: 1.8;
-      max-width: 480px;
-      margin: 0 auto 28px;
+      font-weight: 300; font-size: 14px; color: var(--brown);
+      line-height: 1.8; max-width: 460px; margin: 0 auto 24px;
     }
 
-    .pills {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+    .pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
     .pill {
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 9px;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--caramel);
-      border: 1px solid var(--nude);
-      border-radius: 20px;
-      padding: 6px 16px;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--caramel); border: 1px solid var(--nude);
+      border-radius: 20px; padding: 6px 16px;
     }
 
-    /* ── Form container ── */
-    .form-wrap {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 52px 24px 80px;
+    /* Progress bar */
+    .progress-wrap {
+      background: var(--cream); border-bottom: 1px solid var(--linen);
+      padding: 18px 28px; position: sticky; top: 62px; z-index: 9;
     }
 
-    /* ── Section headers ── */
+    .progress-steps {
+      max-width: 640px; margin: 0 auto;
+      display: flex; align-items: center; gap: 0;
+    }
+
+    .ps { display: flex; align-items: center; gap: 8px; }
+
+    .ps-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 9px; border: 1px solid var(--linen);
+      color: rgba(44,31,20,0.35); transition: all 0.3s;
+    }
+
+    .ps-num.active { background: var(--espresso); color: var(--cream); border-color: var(--espresso); }
+    .ps-num.done { background: var(--caramel); color: var(--cream); border-color: var(--caramel); }
+
+    .ps-lbl {
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase;
+      color: rgba(44,31,20,0.35); transition: color 0.3s;
+      display: none;
+    }
+
+    @media(min-width: 500px) { .ps-lbl { display: block; } }
+    .ps-lbl.active { color: var(--espresso); }
+    .ps-lbl.done { color: var(--caramel); }
+    .ps-line { flex: 1; height: 1px; background: var(--linen); }
+
+    /* Form */
+    .form-wrap { max-width: 640px; margin: 0 auto; padding: 40px 20px 80px; }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
     .section-title {
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 9px;
-      letter-spacing: 0.4em;
-      color: var(--caramel);
-      text-transform: uppercase;
-      padding-left: 0.4em;
-      margin-bottom: 24px;
-      padding-bottom: 14px;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 9px; letter-spacing: 0.4em; color: var(--caramel);
+      text-transform: uppercase; padding-left: 0.4em;
+      margin-bottom: 24px; padding-bottom: 12px;
       border-bottom: 1px solid var(--linen);
     }
 
-    .section {
-      margin-bottom: 48px;
-    }
+    .section { margin-bottom: 40px; }
 
-    /* ── Fields ── */
-    .field {
-      margin-bottom: 28px;
-    }
+    .field { margin-bottom: 26px; }
 
     .field label {
-      display: block;
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 8.5px;
-      letter-spacing: 0.32em;
-      color: var(--caramel);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      padding-left: 0.32em;
+      display: block; font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 8.5px; letter-spacing: 0.32em; color: var(--caramel);
+      text-transform: uppercase; margin-bottom: 10px; padding-left: 0.32em;
     }
 
-    .field label .req {
-      color: var(--nude);
-      margin-left: 4px;
+    .field label .req { color: var(--nude); margin-left: 4px; }
+
+    .field input, .field select, .field textarea {
+      width: 100%; background: transparent; border: none;
+      border-bottom: 1px solid var(--linen); color: var(--espresso);
+      font-family: 'DM Sans', sans-serif; font-weight: 300; font-size: 15px;
+      padding: 8px 0; outline: none; transition: border-color 0.2s;
+      border-radius: 0; -webkit-appearance: none;
     }
 
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--linen);
-      color: var(--espresso);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 15px;
-      padding: 8px 0;
-      outline: none;
-      transition: border-color 0.2s;
-      border-radius: 0;
-      -webkit-appearance: none;
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
+    .field input:focus, .field select:focus, .field textarea:focus {
       border-bottom-color: var(--espresso);
     }
 
-    .field input::placeholder,
-    .field textarea::placeholder {
+    .field input::placeholder, .field textarea::placeholder {
       color: rgba(44,31,20,0.28);
     }
 
-    .field select {
-      cursor: pointer;
-      color: var(--espresso);
-    }
-
-    .field select option[value=""] {
-      color: rgba(44,31,20,0.28);
-    }
-
-    .field textarea {
-      resize: none;
-      height: 80px;
-      line-height: 1.7;
-    }
+    .field textarea { resize: none; height: 90px; line-height: 1.7; }
 
     .field-hint {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 11px;
-      color: rgba(44,31,20,0.38);
-      margin-top: 7px;
-      line-height: 1.6;
+      font-size: 11px; font-weight: 300; color: rgba(44,31,20,0.38);
+      margin-top: 7px; line-height: 1.6;
     }
 
-    /* ── Two columns ── */
-    .row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0 32px;
-    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+    @media(max-width: 480px) { .row-2 { grid-template-columns: 1fr; } }
 
-    @media (max-width: 480px) {
-      .row-2 { grid-template-columns: 1fr; }
-    }
-
-    /* ── Category chips ── */
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-    }
+    /* Chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 
     .chip {
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 9px;
-      letter-spacing: 0.28em;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--espresso); border: 1px solid var(--linen);
+      border-radius: 20px; padding: 8px 16px; cursor: pointer;
+      transition: all 0.15s; user-select: none;
+    }
+
+    .chip.active { background: var(--espresso); color: var(--cream); border-color: var(--espresso); }
+
+    /* Orari grid */
+    .hours-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px;
+      margin-top: 6px;
+    }
+
+    .hours-row { display: flex; flex-direction: column; gap: 6px; }
+
+    .hours-row-label {
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 8px; letter-spacing: 0.3em; color: var(--caramel);
       text-transform: uppercase;
-      color: var(--espresso);
-      border: 1px solid var(--linen);
-      border-radius: 20px;
-      padding: 8px 18px;
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
     }
 
-    .chip.active {
-      background: var(--espresso);
-      color: var(--cream);
-      border-color: var(--espresso);
+    .hours-inputs { display: flex; align-items: center; gap: 8px; }
+
+    .hours-inputs input[type="time"] {
+      flex: 1; border-bottom: 1px solid var(--linen); font-size: 13px;
+      padding: 6px 0; background: transparent; border-top: none;
+      border-left: none; border-right: none; outline: none; color: var(--espresso);
     }
 
-    /* ── Privacy ── */
+    .hours-inputs span { font-size: 11px; color: var(--caramel); }
+
+    .hours-check {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+
+    .hours-check input[type="checkbox"] { accent-color: var(--espresso); width: 14px; height: 14px; }
+
+    .hours-check label {
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 8px; letter-spacing: 0.3em; color: var(--espresso);
+      text-transform: uppercase; cursor: pointer; margin: 0; padding: 0;
+    }
+
+    /* Photo upload */
+    .photo-upload-area {
+      border: 1px dashed var(--nude); border-radius: 4px;
+      padding: 32px 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; margin-top: 6px; position: relative;
+    }
+
+    .photo-upload-area:hover { background: var(--sand); border-color: var(--caramel); }
+
+    .photo-upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      width: 100%; height: 100%; border: none;
+    }
+
+    .upload-icon {
+      width: 36px; height: 36px; margin: 0 auto 10px;
+      border: 1px solid var(--linen); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .upload-label {
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--caramel); margin-bottom: 6px;
+    }
+
+    .upload-hint { font-size: 11px; color: rgba(44,31,20,0.38); }
+
+    .photo-previews {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px;
+    }
+
+    .photo-preview {
+      width: 80px; height: 80px; border-radius: 4px;
+      object-fit: cover; border: 1px solid var(--linen);
+      position: relative; display: inline-block;
+    }
+
+    .photo-preview-wrap { position: relative; width: 80px; height: 80px; }
+
+    .photo-preview-wrap img {
+      width: 80px; height: 80px; border-radius: 4px;
+      object-fit: cover; border: 1px solid var(--linen);
+    }
+
+    .photo-remove {
+      position: absolute; top: -6px; right: -6px;
+      width: 18px; height: 18px; background: var(--espresso);
+      color: var(--cream); border-radius: 50%; border: none;
+      cursor: pointer; font-size: 11px; display: flex;
+      align-items: center; justify-content: center; line-height: 1;
+    }
+
+    /* Nav buttons */
+    .nav-row {
+      display: flex; gap: 12px; align-items: center;
+      margin-top: 36px; padding-top: 24px;
+      border-top: 1px solid var(--linen);
+    }
+
+    .btn-next {
+      background: var(--espresso); color: var(--cream); border: none;
+      border-radius: 2px; cursor: pointer;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 10px; letter-spacing: 0.42em; text-transform: uppercase;
+      padding: 16px 28px 16px 32px; transition: opacity 0.2s;
+    }
+
+    .btn-next:hover { opacity: 0.85; }
+    .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-back {
+      background: transparent; color: var(--espresso);
+      border: 1px solid var(--linen); border-radius: 2px; cursor: pointer;
+      font-family: 'Josefin Sans', sans-serif; font-weight: 300;
+      font-size: 10px; letter-spacing: 0.38em; text-transform: uppercase;
+      padding: 14px 22px 14px 26px; transition: border-color 0.2s;
+    }
+
+    .btn-back:hover { border-color: var(--espresso); }
+
+    .step-counter {
+      margin-left: auto; font-family: 'Josefin Sans', sans-serif;
+      font-weight: 300; font-size: 10px; color: rgba(44,31,20,0.35);
+      letter-spacing: 0.1em;
+    }
+
+    /* Privacy */
     .privacy-box {
-      background: var(--sand);
-      border: 1px solid var(--linen);
-      border-radius: 2px;
-      padding: 18px 20px;
-      margin-bottom: 28px;
+      background: var(--sand); border: 1px solid var(--linen);
+      border-radius: 2px; padding: 16px 18px; margin-bottom: 24px;
     }
 
-    .privacy-box label {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      cursor: pointer;
-    }
+    .privacy-box label { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
 
     .privacy-box input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      margin-top: 2px;
-      accent-color: var(--espresso);
-      cursor: pointer;
+      width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px;
+      accent-color: var(--espresso); cursor: pointer;
     }
 
     .privacy-box span {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 12px;
-      color: var(--brown);
-      line-height: 1.7;
+      font-size: 12px; font-weight: 300; color: var(--brown); line-height: 1.7;
     }
 
-    .privacy-box a {
-      color: var(--caramel);
-      text-decoration: underline;
+    .privacy-box a { color: var(--caramel); }
+
+    /* Error / status */
+    .err-msg {
+      display: none; font-size: 12px; color: #c0392b;
+      margin-top: 8px; text-align: center;
     }
+    .err-msg.show { display: block; }
 
-    /* ── Submit ── */
-    .submit-btn {
-      width: 100%;
-      background: var(--espresso);
-      color: var(--cream);
-      border: none;
-      border-radius: 2px;
-      cursor: pointer;
-      font-family: 'Josefin Sans', sans-serif;
-      font-weight: 300;
-      font-size: 11px;
-      letter-spacing: 0.42em;
-      text-transform: uppercase;
-      padding: 18px 0 18px 12px;
-      transition: opacity 0.2s;
-    }
-
-    .submit-btn:hover { opacity: 0.85; }
-    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .submit-note {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 11px;
-      color: rgba(44,31,20,0.35);
-      text-align: center;
-      margin-top: 12px;
-      line-height: 1.7;
-    }
-
-    /* ── Success screen ── */
+    /* Success */
     #success {
-      display: none;
-      min-height: 70vh;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 48px 24px;
-      gap: 20px;
+      display: none; flex-direction: column; align-items: center;
+      text-align: center; padding: 64px 24px; gap: 20px;
+      min-height: 60vh; justify-content: center;
     }
-
     #success.show { display: flex; }
 
-    .success-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--sand);
-      border: 1px solid var(--linen);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .check-circle {
+      width: 56px; height: 56px; background: var(--sand);
+      border: 1px solid var(--linen); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
     }
 
     #success h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: 32px;
-      color: var(--espresso);
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: 32px; color: var(--espresso);
     }
 
     #success p {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 14px;
-      color: var(--brown);
-      line-height: 1.8;
-      max-width: 380px;
-    }
-
-    /* ── Error msg ── */
-    .error-msg {
-      display: none;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      font-size: 12px;
-      color: #c0392b;
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .error-msg.show { display: block; }
-
-    /* ── Divider ── */
-    .divider {
-      height: 1px;
-      background: var(--linen);
-      margin: 40px 0;
+      font-size: 14px; font-weight: 300; color: var(--brown);
+      line-height: 1.8; max-width: 380px;
     }
   </style>
 </head>
 <body>
 
-<!-- Header -->
 <header>
-  <a href="https://kaumalastminutebeauty.github.io/kauma" class="logo-arch">
-    <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
-      <path d="M1.2 28.8 L1.2 11 A9.8 9.8 0 0 1 20.8 11 L20.8 28.8" stroke="#2c1f14" stroke-width="1.2" fill="none" stroke-linecap="square"/>
+  <a href="https://kaumalastminutebeauty.github.io/KAUMA/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <svg width="20" height="26" viewBox="0 0 20 26" fill="none">
+      <path d="M1 25 L1 10 A9 9 0 0 1 19 10 L19 25" stroke="#2c1f14" stroke-width="1.2" fill="none" stroke-linecap="square"/>
     </svg>
     <span class="logo-text">KAUMA</span>
   </a>
@@ -403,8 +358,8 @@
 <!-- Hero -->
 <div class="hero">
   <div class="hero-label">Per i professionisti</div>
-  <h1>Diventa<br /><em>Partner Kauma</em></h1>
-  <p>Riempi gli slot vuoti dell'ultimo minuto. Zero abbonamenti, zero canone fisso — paghi solo il 15% sulle prenotazioni completate.</p>
+  <h1>Diventa<br/><em>Partner Kauma</em></h1>
+  <p>Riempi gli slot vuoti dell'ultimo minuto. Zero canone fisso — paghi solo il 15% sulle prenotazioni completate.</p>
   <div class="pills">
     <span class="pill">Solo su invito</span>
     <span class="pill">Commissione 15%</span>
@@ -412,165 +367,358 @@
   </div>
 </div>
 
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-steps" id="progress-steps">
+    <!-- filled by JS -->
+  </div>
+</div>
+
 <!-- Form -->
 <div class="form-wrap" id="form-wrap">
   <form id="onboarding-form" novalidate>
 
-    <!-- 1. Il tuo centro -->
-    <div class="section">
-      <div class="section-title">01 · Il tuo centro</div>
+    <!-- STEP 1: Il tuo centro -->
+    <div class="step-panel active" id="panel-1">
+      <div class="section">
+        <div class="section-title">01 · Il tuo centro</div>
 
-      <div class="field">
-        <label>Nome del salone / studio <span class="req">*</span></label>
-        <input type="text" id="nome_salone" placeholder="es. Centro Estetico Fiore" required />
-      </div>
-
-      <div class="row-2">
         <div class="field">
-          <label>Città <span class="req">*</span></label>
-          <input type="text" id="citta" placeholder="es. Seregno" required />
+          <label>Nome del salone / studio <span class="req">*</span></label>
+          <input type="text" id="nome_salone" placeholder="es. Centro Estetico Fiore" required />
         </div>
+
         <div class="field">
-          <label>Zona / quartiere</label>
-          <input type="text" id="zona" placeholder="es. Centro storico" />
+          <label>Categoria principale <span class="req">*</span></label>
+          <div class="chips" id="categoria-chips">
+            <span class="chip" data-val="Estetista">Estetista</span>
+            <span class="chip" data-val="Parrucchiere">Parrucchiere</span>
+            <span class="chip" data-val="Nail Salon">Nail Salon</span>
+            <span class="chip" data-val="Massaggi">Massaggi</span>
+            <span class="chip" data-val="Yoga">Yoga</span>
+            <span class="chip" data-val="Pilates">Pilates</span>
+            <span class="chip" data-val="Personal Training">Personal Training</span>
+            <span class="chip" data-val="Altro">Altro</span>
+          </div>
+          <input type="hidden" id="categoria" required />
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Città <span class="req">*</span></label>
+            <input type="text" id="citta" placeholder="es. Seregno" required />
+          </div>
+          <div class="field">
+            <label>Zona / quartiere</label>
+            <input type="text" id="zona" placeholder="es. Centro" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Indirizzo completo</label>
+          <input type="text" id="indirizzo" placeholder="Via Roma 12, 20831 Seregno" />
+        </div>
+
+        <div class="field">
+          <label>Link Google Maps</label>
+          <input type="url" id="google_maps" placeholder="https://maps.google.com/..." oninput="parseGoogleMapsUrl(this.value)" />
+          <div class="field-hint">Apri Google Maps, cerca il tuo centro, clicca Condividi e copia il link. Le coordinate si estraggono automaticamente.</div>
+        </div>
+
+        <div class="field">
+          <label>Posizione GPS</label>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <input type="text" id="lat" placeholder="Latitudine (es. 45.6234)" style="flex:1" readonly />
+            <input type="text" id="lng" placeholder="Longitudine (es. 9.1987)" style="flex:1" readonly />
+            <button type="button" onclick="detectLocation()" style="background:var(--espresso);color:var(--cream);border:none;border-radius:2px;padding:8px 14px;font-family:Josefin Sans,sans-serif;font-size:9px;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0;">📍 Rileva</button>
+          </div>
+          <div class="field-hint" id="geo-status">Si compila automaticamente dal link Google Maps, oppure clicca Rileva per usare il GPS del tuo dispositivo.</div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>N. cabine / postazioni</label>
+            <input type="number" id="postazioni" placeholder="es. 3" min="1" />
+          </div>
+          <div class="field">
+            <label>Anno di apertura</label>
+            <input type="number" id="anno_apertura" placeholder="es. 2018" min="1950" max="2026" />
+          </div>
         </div>
       </div>
 
-      <div class="field">
-        <label>Indirizzo completo</label>
-        <input type="text" id="indirizzo" placeholder="Via Roma 12, 20831 Seregno" />
-      </div>
-
-      <div class="field">
-        <label>Categoria principale <span class="req">*</span></label>
-        <div class="chips" id="categoria-chips">
-          <span class="chip" data-val="Estetista">Estetista</span>
-          <span class="chip" data-val="Parrucchiere">Parrucchiere</span>
-          <span class="chip" data-val="Nail Salon">Nail Salon</span>
-          <span class="chip" data-val="Massaggi">Massaggi</span>
-          <span class="chip" data-val="Yoga">Yoga</span>
-          <span class="chip" data-val="Pilates">Pilates</span>
-          <span class="chip" data-val="Personal Training">Personal Training</span>
-          <span class="chip" data-val="Altro">Altro</span>
-        </div>
-        <input type="hidden" id="categoria" required />
+      <div class="nav-row">
+        <button type="button" class="btn-next" onclick="goTo(2)">Continua →</button>
+        <span class="step-counter">1 / 5</span>
       </div>
     </div>
 
-    <!-- 2. Contatti -->
-    <div class="section">
-      <div class="section-title">02 · Contatti</div>
+    <!-- STEP 2: Foto -->
+    <div class="step-panel" id="panel-2">
+      <div class="section">
+        <div class="section-title">02 · Foto del centro</div>
 
-      <div class="field">
-        <label>Nome del titolare <span class="req">*</span></label>
-        <input type="text" id="titolare" placeholder="Nome e cognome" required />
-      </div>
-
-      <div class="row-2">
         <div class="field">
-          <label>Telefono <span class="req">*</span></label>
-          <input type="tel" id="telefono" placeholder="+39 333 000 0000" required />
+          <label>Foto del centro <span class="req">*</span></label>
+          <div class="photo-upload-area" id="upload-area">
+            <input type="file" id="foto-input" accept="image/*" multiple onchange="handlePhotos(this)" />
+            <div class="upload-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2v8M5 5l3-3 3 3" stroke="#a07850" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 11v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1" stroke="#a07850" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="upload-label">Carica foto</div>
+            <div class="upload-hint">Fino a 5 foto · JPG o PNG · max 5MB ciascuna</div>
+          </div>
+          <div class="photo-previews" id="photo-previews"></div>
+          <div class="field-hint" style="margin-top:10px;">Carica almeno una foto dell'interno del tuo centro. Le foto vengono mostrate sull'app alle clienti.</div>
         </div>
+
         <div class="field">
-          <label>WhatsApp</label>
-          <input type="tel" id="whatsapp" placeholder="Stesso o diverso dal tel." />
-          <div class="field-hint">Useremo WhatsApp per inviarti le prenotazioni in tempo reale.</div>
+          <label>Link Instagram</label>
+          <input type="text" id="instagram" placeholder="@tuostudio" />
         </div>
-      </div>
 
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="email" placeholder="info@tuostudio.it" />
-      </div>
-
-      <div class="field">
-        <label>Instagram</label>
-        <input type="text" id="instagram" placeholder="@tuostudio" />
-      </div>
-    </div>
-
-    <!-- 3. I tuoi servizi -->
-    <div class="section">
-      <div class="section-title">03 · I tuoi servizi</div>
-
-      <div class="field">
-        <label>Servizi offerti</label>
-        <textarea id="servizi" placeholder="es. Manicure gel, Pedicure, Facial, Massaggio relax…"></textarea>
-        <div class="field-hint">Elenca i servizi che vorresti pubblicare su Kauma. Potrai aggiungerli e modificarli liberamente dopo l'attivazione.</div>
-      </div>
-
-      <div class="row-2">
         <div class="field">
-          <label>Prezzo medio (€)</label>
-          <input type="number" id="prezzo_medio" placeholder="es. 65" min="0" />
-        </div>
-        <div class="field">
-          <label>Durata media (minuti)</label>
-          <input type="number" id="durata_media" placeholder="es. 60" min="0" />
+          <label>Sito web</label>
+          <input type="url" id="sito_web" placeholder="https://tuostudio.it" />
         </div>
       </div>
 
-      <div class="field">
-        <label>Disponibilità tipica per slot last minute</label>
-        <select id="disponibilita">
-          <option value="">Seleziona…</option>
-          <option value="Mattina">Mattina (9:00 – 13:00)</option>
-          <option value="Pomeriggio">Pomeriggio (13:00 – 18:00)</option>
-          <option value="Sera">Sera (18:00 – 21:00)</option>
-          <option value="Variabile">Variabile — inserisco di volta in volta</option>
-        </select>
+      <div class="nav-row">
+        <button type="button" class="btn-back" onclick="goTo(1)">← Indietro</button>
+        <button type="button" class="btn-next" onclick="goTo(3)">Continua →</button>
+        <span class="step-counter">2 / 5</span>
       </div>
     </div>
 
-    <!-- 4. Pagamenti -->
-    <div class="section">
-      <div class="section-title">04 · Pagamenti</div>
+    <!-- STEP 3: Contatti & orari -->
+    <div class="step-panel" id="panel-3">
+      <div class="section">
+        <div class="section-title">03 · Contatti</div>
 
-      <div class="field">
-        <label>IBAN <span class="req">*</span></label>
-        <input type="text" id="iban" placeholder="IT00 X000 0000 0000 0000 0000 000" required />
-        <div class="field-hint">Utilizziamo l'IBAN per accreditarti i pagamenti entro 48h dalla prenotazione completata. I dati sono cifrati e non vengono condivisi con terzi.</div>
+        <div class="field">
+          <label>Nome del titolare <span class="req">*</span></label>
+          <input type="text" id="titolare" placeholder="Nome e cognome" required />
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Telefono <span class="req">*</span></label>
+            <input type="tel" id="telefono" placeholder="+39 333 000 0000" required />
+          </div>
+          <div class="field">
+            <label>WhatsApp</label>
+            <input type="tel" id="whatsapp" placeholder="Stesso o diverso dal tel." />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="info@tuostudio.it" />
+        </div>
       </div>
 
-      <div class="field">
-        <label>Intestatario conto</label>
-        <input type="text" id="intestatario" placeholder="Nome o ragione sociale" />
+      <div class="section">
+        <div class="section-title">Orari di apertura</div>
+
+        <div style="margin-bottom: 14px;">
+          <div class="hours-check">
+            <input type="checkbox" id="h-lun" checked />
+            <label for="h-lun">Lunedì</label>
+          </div>
+          <div class="hours-inputs">
+            <input type="time" id="lun-open" value="09:00" />
+            <span>—</span>
+            <input type="time" id="lun-close" value="19:00" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div class="hours-check">
+            <input type="checkbox" id="h-mar" checked />
+            <label for="h-mar">Martedì</label>
+          </div>
+          <div class="hours-inputs">
+            <input type="time" id="mar-open" value="09:00" />
+            <span>—</span>
+            <input type="time" id="mar-close" value="19:00" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div class="hours-check">
+            <input type="checkbox" id="h-mer" checked />
+            <label for="h-mer">Mercoledì</label>
+          </div>
+          <div class="hours-inputs">
+            <input type="time" id="mer-open" value="09:00" />
+            <span>—</span>
+            <input type="time" id="mer-close" value="19:00" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div class="hours-check">
+            <input type="checkbox" id="h-gio" checked />
+            <label for="h-gio">Giovedì</label>
+          </div>
+          <div class="hours-inputs">
+            <input type="time" id="gio-open" value="09:00" />
+            <span>—</span>
+            <input type="time" id="gio-close" value="19:00" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div class="hours-check">
+            <input type="checkbox" id="h-ven" checked />
+            <label for="h-ven">Venerdì</label>
+          </div>
+          <div class="hours-inputs">
+            <input type="time" id="ven-open" value="09:00" />
+            <span>—</span>
+            <input type="time" id="ven-close" value="19:00" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div class="hours-check">
+            <input type="checkbox" id="h-sab" checked />
+            <label for="h-sab">Sabato</label>
+          </div>
+          <div class="hours-inputs">
+            <input type="time" id="sab-open" value="09:00" />
+            <span>—</span>
+            <input type="time" id="sab-close" value="17:00" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div class="hours-check">
+            <input type="checkbox" id="h-dom" />
+            <label for="h-dom">Domenica</label>
+          </div>
+          <div class="hours-inputs">
+            <input type="time" id="dom-open" value="10:00" />
+            <span>—</span>
+            <input type="time" id="dom-close" value="14:00" />
+          </div>
+        </div>
       </div>
 
-      <div class="field">
-        <label>Partita IVA / Codice fiscale</label>
-        <input type="text" id="piva" placeholder="es. IT12345678901" />
-        <div class="field-hint">Necessario per emissione ricevute e fatture.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-back" onclick="goTo(2)">← Indietro</button>
+        <button type="button" class="btn-next" onclick="goTo(4)">Continua →</button>
+        <span class="step-counter">3 / 5</span>
       </div>
     </div>
 
-    <!-- 5. Note -->
-    <div class="section">
-      <div class="section-title">05 · Note libere</div>
-      <div class="field">
-        <label>Vuoi dirci altro?</label>
-        <textarea id="note" placeholder="Domande, esigenze particolari, come hai conosciuto Kauma…"></textarea>
+    <!-- STEP 4: Servizi -->
+    <div class="step-panel" id="panel-4">
+      <div class="section">
+        <div class="section-title">04 · I tuoi servizi</div>
+
+        <div class="field">
+          <label>Servizi offerti</label>
+          <textarea id="servizi" placeholder="es. Manicure gel, Pedicure, Facial, Massaggio relax…"></textarea>
+          <div class="field-hint">Elenca i servizi che vorresti pubblicare su Kauma. Potrai modificarli dopo l'attivazione.</div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Prezzo medio (€)</label>
+            <input type="number" id="prezzo_medio" placeholder="es. 65" min="0" />
+          </div>
+          <div class="field">
+            <label>Durata media (minuti)</label>
+            <input type="number" id="durata_media" placeholder="es. 60" min="0" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Disponibilità tipica last minute</label>
+          <select id="disponibilita">
+            <option value="">Seleziona…</option>
+            <option value="Mattina">Mattina (9:00 – 13:00)</option>
+            <option value="Pomeriggio">Pomeriggio (13:00 – 18:00)</option>
+            <option value="Sera">Sera (18:00 – 21:00)</option>
+            <option value="Variabile">Variabile — inserisco di volta in volta</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Listino prezzi (opzionale)</label>
+          <div class="photo-upload-area" style="padding: 20px;">
+            <input type="file" id="listino-input" accept="image/*,.pdf" onchange="handleListino(this)" />
+            <div class="upload-label">Carica listino</div>
+            <div class="upload-hint">Foto o PDF del listino prezzi</div>
+          </div>
+          <div id="listino-preview" style="margin-top:8px; font-size:12px; color:var(--caramel);"></div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button type="button" class="btn-back" onclick="goTo(3)">← Indietro</button>
+        <button type="button" class="btn-next" onclick="goTo(5)">Continua →</button>
+        <span class="step-counter">4 / 5</span>
       </div>
     </div>
 
-    <!-- Privacy -->
-    <div class="privacy-box">
-      <label>
-        <input type="checkbox" id="privacy" required />
-        <span>Accetto il trattamento dei dati personali secondo la <a href="#">Privacy Policy</a> di Kauma e confermo di aver letto le <a href="#">condizioni per i partner</a>. Commissione del 15% su ogni prenotazione completata, senza canone fisso.</span>
-      </label>
-    </div>
+    <!-- STEP 5: Pagamenti & invio -->
+    <div class="step-panel" id="panel-5">
+      <div class="section">
+        <div class="section-title">05 · Pagamenti</div>
 
-    <button type="submit" class="submit-btn" id="submit-btn">Invia candidatura</button>
-    <p class="submit-note">Ti ricontattiamo entro 48 ore per completare l'attivazione.</p>
-    <div class="error-msg" id="error-msg">Qualcosa è andato storto. Riprova o scrivi a <strong>kauma.app@outlook.com</strong></div>
+        <div class="field">
+          <label>IBAN <span class="req">*</span></label>
+          <input type="text" id="iban" placeholder="IT00 X000 0000 0000 0000 0000 000" required />
+          <div class="field-hint">Accreditiamo i pagamenti entro 48h dalla prenotazione completata. Dati cifrati, mai condivisi.</div>
+        </div>
+
+        <div class="field">
+          <label>Intestatario conto</label>
+          <input type="text" id="intestatario" placeholder="Nome o ragione sociale" />
+        </div>
+
+        <div class="field">
+          <label>Partita IVA / Codice fiscale</label>
+          <input type="text" id="piva" placeholder="es. IT12345678901" />
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">06 · Note libere</div>
+        <div class="field">
+          <label>Vuoi dirci altro?</label>
+          <textarea id="note" placeholder="Domande, esigenze particolari, come hai conosciuto Kauma…"></textarea>
+        </div>
+      </div>
+
+      <div class="privacy-box">
+        <label>
+          <input type="checkbox" id="privacy" required />
+          <span>Accetto il trattamento dei dati personali secondo la <a href="#">Privacy Policy</a> di Kauma e le <a href="#">condizioni per i partner</a>. Commissione 15% per prenotazione completata, zero canone fisso.</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn-next" id="submit-btn" style="width:100%;">Invia candidatura</button>
+      <p style="font-size:11px; color:rgba(44,31,20,0.35); text-align:center; margin-top:10px; line-height:1.7;">Ti ricontattiamo entro 48 ore per completare l'attivazione.</p>
+      <div class="err-msg" id="error-msg">Qualcosa è andato storto. Riprova o scrivi a <strong>kauma.app@outlook.com</strong></div>
+
+      <div class="nav-row" style="border:none; padding:0; margin-top:16px;">
+        <button type="button" class="btn-back" onclick="goTo(4)">← Indietro</button>
+        <span class="step-counter">5 / 5</span>
+      </div>
+    </div>
 
   </form>
 </div>
 
 <!-- Success -->
 <div id="success">
-  <div class="success-icon">
+  <div class="check-circle">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <path d="M5 11l5 5 7-8" stroke="#2c1f14" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
@@ -584,7 +732,57 @@
   const SUPABASE_URL = 'https://wgcxsuvqazrsahbegjul.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndnY3hzdXZxYXpyc2FoYmVnanVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMTgxMDUsImV4cCI6MjA5Mjg5NDEwNX0.uedcq0bpf_EVqj4G0yXdJTeGUzCC54iQQH7O9NduRBM';
 
-  /* ── Category chips ── */
+  const STEPS = ['Centro', 'Foto', 'Contatti', 'Servizi', 'Pagamenti'];
+  let currentStep = 1;
+  let photoFiles = [];
+  let listinoFile = null;
+
+  // ── Progress bar ─────────────────────────
+  function renderProgress() {
+    const wrap = document.getElementById('progress-steps');
+    wrap.innerHTML = STEPS.map((label, i) => {
+      const n = i + 1;
+      const cls = n < currentStep ? 'done' : n === currentStep ? 'active' : '';
+      return `
+        ${i > 0 ? '<div class="ps-line"></div>' : ''}
+        <div class="ps">
+          <div class="ps-num ${cls}">${n < currentStep ? '✓' : n}</div>
+          <div class="ps-lbl ${cls}">${label}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function goTo(n) {
+    // Validate current step before advancing
+    if (n > currentStep) {
+      const err = validateStep(currentStep);
+      if (err) { alert(err); return; }
+    }
+    document.getElementById(`panel-${currentStep}`).classList.remove('active');
+    currentStep = n;
+    document.getElementById(`panel-${currentStep}`).classList.add('active');
+    renderProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function validateStep(step) {
+    if (step === 1) {
+      if (!document.getElementById('nome_salone').value.trim()) return 'Inserisci il nome del salone.';
+      if (!document.getElementById('categoria').value) return 'Seleziona una categoria.';
+      if (!document.getElementById('citta').value.trim()) return 'Inserisci la città.';
+    }
+    if (step === 3) {
+      if (!document.getElementById('titolare').value.trim()) return 'Inserisci il nome del titolare.';
+      if (!document.getElementById('telefono').value.trim()) return 'Inserisci il numero di telefono.';
+    }
+    if (step === 5) {
+      if (!document.getElementById('iban').value.trim()) return 'Inserisci l\'IBAN.';
+      if (!document.getElementById('privacy').checked) return 'Accetta la privacy policy per continuare.';
+    }
+    return null;
+  }
+
+  // ── Category chips ────────────────────────
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -593,56 +791,116 @@
     });
   });
 
-  /* ── Form submit ── */
+  // ── Photo upload ──────────────────────────
+  function handlePhotos(input) {
+    const files = Array.from(input.files).slice(0, 5 - photoFiles.length);
+    files.forEach(f => {
+      if (f.size > 5 * 1024 * 1024) { alert(`${f.name} è troppo grande (max 5MB).`); return; }
+      photoFiles.push(f);
+      const url = URL.createObjectURL(f);
+      const wrap = document.createElement('div');
+      wrap.className = 'photo-preview-wrap';
+      wrap.innerHTML = `<img src="${url}" /><button class="photo-remove" type="button" onclick="removePhoto(this, '${url}')">×</button>`;
+      document.getElementById('photo-previews').appendChild(wrap);
+    });
+    input.value = '';
+  }
+
+  function removePhoto(btn, url) {
+    const wrap = btn.parentElement;
+    const img = wrap.querySelector('img');
+    photoFiles = photoFiles.filter(f => URL.createObjectURL(f) !== url);
+    wrap.remove();
+  }
+
+  function handleListino(input) {
+    listinoFile = input.files[0];
+    if (listinoFile) {
+      document.getElementById('listino-preview').textContent = '✓ ' + listinoFile.name;
+    }
+  }
+
+  // ── Build orari object ────────────────────
+  function getOrari() {
+    const days = ['lun','mar','mer','gio','ven','sab','dom'];
+    const labels = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+    const orari = {};
+    days.forEach((d, i) => {
+      const open = document.getElementById(`h-${d}`).checked;
+      orari[labels[i]] = open
+        ? `${document.getElementById(`${d}-open`).value}–${document.getElementById(`${d}-close`).value}`
+        : 'Chiuso';
+    });
+    return orari;
+  }
+
+  // ── Upload photo to Supabase Storage ─────
+  async function uploadPhoto(file, partnerId, index) {
+    const ext = file.name.split('.').pop();
+    const path = `partners/${partnerId}/foto_${index}.${ext}`;
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/partner-photos/${path}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': file.type,
+      },
+      body: file
+    });
+    if (!res.ok) return null;
+    return `${SUPABASE_URL}/storage/v1/object/public/partner-photos/${path}`;
+  }
+
+  // ── Form submit ───────────────────────────
   document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const btn = document.getElementById('submit-btn');
-    const errMsg = document.getElementById('error-msg');
-    errMsg.classList.remove('show');
-
-    // Validation
-    const required = ['nome_salone', 'citta', 'categoria', 'titolare', 'telefono', 'iban', 'privacy'];
-    for (const id of required) {
-      const el = document.getElementById(id);
-      if (id === 'privacy' && !el.checked) {
-        el.focus();
-        errMsg.textContent = 'Accetta la privacy policy per continuare.';
-        errMsg.classList.add('show');
-        return;
-      }
-      if (id !== 'privacy' && !el.value.trim()) {
-        el.focus();
-        errMsg.textContent = 'Compila tutti i campi obbligatori (*)';
-        errMsg.classList.add('show');
-        return;
-      }
+    const err = validateStep(5);
+    if (err) {
+      const msg = document.getElementById('error-msg');
+      msg.textContent = err; msg.classList.add('show'); return;
     }
 
-    btn.disabled = true;
-    btn.textContent = 'Invio in corso…';
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true; btn.textContent = 'Invio in corso…';
+    document.getElementById('error-msg').classList.remove('show');
+
+    const tempId = Date.now();
+    let fotoUrls = [];
+
+    // Upload photos
+    for (let i = 0; i < photoFiles.length; i++) {
+      const url = await uploadPhoto(photoFiles[i], tempId, i + 1);
+      if (url) fotoUrls.push(url);
+    }
 
     const payload = {
       Nome_salone:   document.getElementById('nome_salone').value.trim(),
-      titolare:      document.getElementById('titolare').value.trim(),
       categoria:     document.getElementById('categoria').value,
       citta:         document.getElementById('citta').value.trim(),
       zona:          document.getElementById('zona').value.trim() || null,
       indirizzo:     document.getElementById('indirizzo').value.trim() || null,
+      google_maps:   document.getElementById('google_maps').value.trim() || null,
+      postazioni:    document.getElementById('postazioni').value ? parseInt(document.getElementById('postazioni').value) : null,
+      anno_apertura: document.getElementById('anno_apertura').value ? parseInt(document.getElementById('anno_apertura').value) : null,
+      foto_urls:     fotoUrls.length > 0 ? JSON.stringify(fotoUrls) : null,
+      instagram:     document.getElementById('instagram').value.trim() || null,
+      sito_web:      document.getElementById('sito_web').value.trim() || null,
+      titolare:      document.getElementById('titolare').value.trim(),
       telefono:      document.getElementById('telefono').value.trim(),
       whatsapp:      document.getElementById('whatsapp').value.trim() || document.getElementById('telefono').value.trim(),
       email:         document.getElementById('email').value.trim() || null,
-      instagram:     document.getElementById('instagram').value.trim() || null,
+      orari:         JSON.stringify(getOrari()),
       servizi:       document.getElementById('servizi').value.trim() || null,
       prezzo_medio:  document.getElementById('prezzo_medio').value ? Number(document.getElementById('prezzo_medio').value) : null,
       durata_media:  document.getElementById('durata_media').value ? Number(document.getElementById('durata_media').value) : null,
       disponibilita: document.getElementById('disponibilita').value || null,
-      iban:          document.getElementById('iban').value.trim().replace(/\s/g, ''),
+      iban:          document.getElementById('iban').value.trim().replace(/\s/g,''),
       intestatario:  document.getElementById('intestatario').value.trim() || null,
       piva:          document.getElementById('piva').value.trim() || null,
+      lat:           document.getElementById('lat').value ? parseFloat(document.getElementById('lat').value) : null,
+      lng:           document.getElementById('lng').value ? parseFloat(document.getElementById('lng').value) : null,
       note:          document.getElementById('note').value.trim() || null,
       stato:         'In attesa',
-      gestito_da:    null,
     };
 
     try {
@@ -658,25 +916,25 @@
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error('Supabase error:', err);
-        throw new Error(err.message || 'Errore Supabase');
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || 'Errore Supabase');
       }
 
-      // Success
       document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('progress-steps').parentElement.style.display = 'none';
       document.getElementById('success').classList.add('show');
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    } catch (err) {
+    } catch(err) {
       console.error(err);
-      btn.disabled = false;
-      btn.textContent = 'Invia candidatura';
-      errMsg.textContent = 'Qualcosa è andato storto. Riprova o scrivi a kauma.app@outlook.com';
-      errMsg.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Invia candidatura';
+      const msg = document.getElementById('error-msg');
+      msg.textContent = 'Errore: ' + err.message + '. Scrivi a kauma.app@outlook.com';
+      msg.classList.add('show');
     }
   });
-</script>
 
+  renderProgress();
+</script>
 </body>
 </html>
