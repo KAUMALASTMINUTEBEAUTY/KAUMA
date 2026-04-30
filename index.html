@@ -10,6 +10,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Josefin+Sans:ital,wght@0,100;0,200;0,300;1,100&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .leaflet-container { background: #f0e8dc !important; }
+    .leaflet-popup-content-wrapper { border-radius: 4px !important; border: 1px solid #e8ddd0 !important; box-shadow: none !important; }
+    .leaflet-popup-tip { background: white !important; }
+  </style>
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -69,23 +76,35 @@ function formatDate(date) {
   return giorni[date.getDay()] + ' ' + date.getDate() + ' ' + mesi[date.getMonth()];
 }
 
-function useGeoZone() {
-  const [zone, setZone] = useState("Brianza · Como");
+function haversine(lat1, lng1, lat2, lng2) {
+  if (!lat1 || !lat2) return null;
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  const d = R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  return d < 1 ? (d*1000).toFixed(0)+' m' : d.toFixed(1)+' km';
+}
+
+function useUserLocation() {
+  const [loc, setLoc] = useState({ lat: null, lng: null, zone: 'Brianza · Como' });
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        if (lat > 45.7 && lng > 9.0 && lng < 9.3) setZone("Como · Montorfano");
-        else if (lat > 45.6 && lat <= 45.7) setZone("Brianza · Como");
-        else if (lat > 45.5 && lat <= 45.6) setZone("Brianza · Seregno");
-        else if (lat > 45.4 && lat <= 45.5) setZone("Brianza · Monza");
-        else setZone("Brianza · Como");
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        let zone = 'Brianza · Como';
+        if (lat > 45.7 && lng > 9.0 && lng < 9.3) zone = 'Como · Montorfano';
+        else if (lat > 45.6 && lat <= 45.7) zone = 'Brianza · Como';
+        else if (lat > 45.5 && lat <= 45.6) zone = 'Brianza · Seregno';
+        else if (lat > 45.4 && lat <= 45.5) zone = 'Brianza · Monza';
+        setLoc({ lat, lng, zone });
       },
       () => {}
     );
   }, []);
-  return zone;
+  return loc;
 }
 
 /* ── Supabase slots hook ── */
@@ -125,12 +144,15 @@ function useSupabaseSlots() {
             location: city,
             distance: '',
             coords: '',
+            lat: Number(p.lat) || null,
+            lng: Number(p.lng) || null,
             price: finalPrice,
             available: 'Oggi, ' + (s.orario || ''),
             duration: (s.durata_min || 60) + ' min',
             desc: s.note || '',
             color: '#e8ddd0',
             discount: discountPct,
+            foto_urls: p.foto_urls || null,
           };
         });
         setSlots(merged);
@@ -395,12 +417,25 @@ function SplashScreen({ onDone }) {
 }
 
 /* ── HOME ── */
-function HomeScreen({ onSelect }) {
+function HomeScreen({ onSelect, onMap }) {
   const now = useRealTime();
-  const geoZone = useGeoZone();
+  const userLoc = useUserLocation();
+  const geoZone = userLoc.zone;
   const supaSlots = useSupabaseSlots();
   const cats = ['Tutti','Viso','Corpo','Capelli','Mani'];
   const [cat, setCat] = useState(0);
+  const [sortDist, setSortDist] = useState(false);
+
+  // Enrich slots with calculated distance
+  const enrichedSlots = supaSlots.map(s => ({
+    ...s,
+    distance: haversine(userLoc.lat, userLoc.lng, s.lat, s.lng) || s.distance || '',
+    distKm: s.lat && userLoc.lat ? parseFloat(haversine(userLoc.lat, userLoc.lng, s.lat, s.lng)) || 999 : 999,
+  }));
+
+  const sortedSlots = sortDist
+    ? [...enrichedSlots].sort((a,b) => a.distKm - b.distKm)
+    : enrichedSlots;
 
   return (
     <div className="screen-scroll" style={{ background:C.cream }}>
@@ -461,17 +496,36 @@ function HomeScreen({ onSelect }) {
         ))}
       </div>
 
-      {/* Section label */}
-      <div style={{ padding:'0 20px 14px', display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+      {/* Section label + controls */}
+      <div style={{ padding:'0 20px 14px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <div style={{ fontFamily:"'Josefin Sans'", fontWeight:400, fontSize:10, letterSpacing:'0.14em', color:C.caramel, textTransform:'uppercase' }}>
           DISPONIBILI ORA
         </div>
-        <div style={{ fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontSize:13, color:C.caramel }}>Vedi tutti →</div>
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          {userLoc.lat && (
+            <div onClick={() => setSortDist(v => !v)} style={{
+              fontFamily:"'Josefin Sans'", fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase',
+              color: sortDist ? C.cream : C.caramel,
+              background: sortDist ? C.espresso : 'transparent',
+              border:'1px solid ' + (sortDist ? C.espresso : C.linen),
+              borderRadius:20, padding:'5px 12px', cursor:'pointer', whiteSpace:'nowrap',
+            }}>
+              📍 Vicino a me
+            </div>
+          )}
+          <div onClick={onMap} style={{
+            fontFamily:"'Josefin Sans'", fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase',
+            color: C.caramel, border:'1px solid ' + C.linen,
+            borderRadius:20, padding:'5px 12px', cursor:'pointer', whiteSpace:'nowrap',
+          }}>
+            Mappa
+          </div>
+        </div>
       </div>
 
       {/* Treatment cards */}
       <div style={{ padding:'0 20px', display:'flex', flexDirection:'column', gap:12, paddingBottom:90 }}>
-        {(supaSlots.length > 0 ? supaSlots : treatments).map(t => (
+        {(enrichedSlots.length > 0 ? sortedSlots : treatments).map(t => (
           <div key={t.id} onClick={() => onSelect(t)} style={{
             background:'#fff', border:`1px solid ${C.linen}`,
             borderRadius:3, overflow:'hidden',
@@ -493,7 +547,10 @@ function HomeScreen({ onSelect }) {
               </div>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <div style={{ fontFamily:"'Cormorant Garamond'", fontWeight:400, fontSize:16, color:C.espresso }}>€{t.price}</div>
-                <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:C.caramel, letterSpacing:'0.04em' }}>{t.available}</div>
+                <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                  {t.distance && <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:C.caramel }}>📍 {t.distance}</div>}
+                  <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:10, color:C.caramel, letterSpacing:'0.04em' }}>{t.available}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -1036,12 +1093,55 @@ function ConfirmationScreen({ treatment: t, onHome }) {
 }
 
 /* ── SEARCH / MAP SCREEN ── */
+function SearchMap({ slots, userLoc, onSelect }) {
+  const mapRef = React.useRef(null);
+  const mapInstanceRef = React.useRef(null);
+  const markersRef = React.useRef([]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (!mapInstanceRef.current) {
+      const centerLat = userLoc.lat || 45.62;
+      const centerLng = userLoc.lng || 9.22;
+      const map = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView([centerLat, centerLng], 12);
+      mapInstanceRef.current = map;
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19
+      }).addTo(map);
+      if (userLoc.lat) {
+        const userIcon = L.divIcon({ html: '<div style="width:14px;height:14px;background:#2c1f14;border-radius:50%;border:3px solid #c9a882;"></div>', iconSize:[14,14], iconAnchor:[7,7], className:'' });
+        L.marker([userLoc.lat, userLoc.lng], { icon: userIcon }).addTo(map).bindPopup('<span style="font-size:12px;color:#2c1f14;font-family:DM Sans,sans-serif;">📍 Sei qui</span>');
+      }
+    }
+    // Clear old markers
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+    // Add slot markers
+    slots.forEach(s => {
+      if (!s.lat || !s.lng) return;
+      const icon = L.divIcon({
+        html: '<div style="background:#2c1f14;color:#c9a882;border-radius:50% 50% 50% 0;width:30px;height:30px;transform:rotate(-45deg);border:2px solid #c9a882;display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-family:Georgia,serif;font-size:9px;">€' + s.price + '</span></div>',
+        iconSize:[30,30], iconAnchor:[15,30], className:''
+      });
+      const m = L.marker([s.lat, s.lng], { icon })
+        .addTo(mapInstanceRef.current)
+        .bindPopup('<div style="font-family:DM Sans,sans-serif;min-width:140px;"><div style="font-family:Cormorant Garamond,serif;font-size:15px;color:#2c1f14;margin-bottom:3px;">' + s.name + '</div><div style="font-size:11px;color:#a07850;">' + s.salon + '</div><div style="font-size:11px;color:#a07850;margin-top:2px;">' + s.available + '</div></div>');
+      m.on('click', () => onSelect && onSelect(s));
+      markersRef.current.push(m);
+    });
+  }, [slots.length, userLoc.lat]);
+
+  return <div ref={mapRef} style={{ width:'100%', height:'100%' }} />;
+}
+
 function SearchScreen() {
   const [selectedPin, setSelectedPin] = useState(null);
   const [viewMode, setViewMode] = useState('map'); // 'map' | 'list'
   const [query, setQuery] = useState('');
   const [sheetOpen, setSheetOpen] = useState(true);
   const [radius, setRadius] = useState(1); // km
+  const userLoc = useUserLocation();
+  const supaSlots = useSupabaseSlots();
 
   // user center in SVG coords
   const USER_X = 158, USER_Y = 168;
@@ -1060,11 +1160,20 @@ function SearchScreen() {
     { id:'w3', name:'Atelier Corpo',      salon:'Personal Training',zone:'Porta Venezia, Milano',category:'P.T.',    distance:'1.0 km', price:65, available:'Oggi, 09:00', x:218, y:140, cat:'PT',color:'#ddd5ca', desc:'Personal trainer certificati.' },
   ];
 
-  const filtered = pins.filter(p => {
+  // Merge supaSlots (with real GPS) + mock pins (for demo)
+  const enrichedSupa = supaSlots.map(s => ({
+    ...s,
+    distance: haversine(userLoc.lat, userLoc.lng, s.lat, s.lng) || '',
+    distKm: s.lat && userLoc.lat ? (parseFloat(haversine(userLoc.lat, userLoc.lng, s.lat, s.lng)) || 999) : 999,
+  }));
+
+  const allItems = [...enrichedSupa, ...pins.map(p => {
     const dx = p.x - USER_X, dy = p.y - USER_Y;
-    const distPx = Math.sqrt(dx*dx + dy*dy);
-    const distKm = distPx / KM_TO_PX;
-    const inRadius = distKm <= radius;
+    return { ...p, distKm: Math.sqrt(dx*dx + dy*dy) / KM_TO_PX };
+  })];
+
+  const filtered = allItems.filter(p => {
+    const inRadius = p.distKm <= radius;
     const matchQuery = query === '' ||
       p.name.toLowerCase().includes(query.toLowerCase()) ||
       p.category?.toLowerCase().includes(query.toLowerCase()) ||
@@ -1072,7 +1181,7 @@ function SearchScreen() {
     return inRadius && matchQuery;
   });
 
-  const sel = selectedPin !== null ? filtered.find(p => p.id === selectedPin) : null;
+  const [sel, setSel] = useState(null);
 
   return (
     <div style={{ width:'100%', height:'100%', background:C.cream, display:'flex', flexDirection:'column', overflow:'hidden' }}>
@@ -1131,12 +1240,7 @@ function SearchScreen() {
       {/* MAP VIEW */}
       {viewMode === 'map' && (
         <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
-          {/* SVG Map */}
-                    <div style={{ position:'relative', width:'100%', height:'100%' }}>
-            <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=9.00%2C45.50%2C9.35%2C45.75&layer=mapnik" style={{ width:'100%', height:'100%', border:'none' }} title="Mappa Kauma" loading="lazy" />
-            <div style={{ position:'absolute', top:12, left:12, background:'rgba(250,247,242,0.92)', borderRadius:6, padding:'6px 12px', fontFamily:"'DM Sans'", fontWeight:400, fontSize:11, color:'#3A2C1E', zIndex:10, border:'1px solid #E8DDD0' }}>Brianza · Como</div>
-          </div>
-
+          <SearchMap slots={filtered} userLoc={userLoc} onSelect={setSel} />
           {/* Selected pin card */}
           {sel && (
             <div style={{
@@ -1637,6 +1741,107 @@ function TabBar({ active, onChange }) {
   );
 }
 
+
+/* ════════════════════════════════════════════
+   MAP SCREEN
+════════════════════════════════════════════ */
+function MapScreen({ onBack, onSelect }) {
+  const userLoc = useUserLocation();
+  const slots = useSupabaseSlots();
+  const mapRef = React.useRef(null);
+  const mapInstanceRef = React.useRef(null);
+
+  const enriched = slots.map(s => ({
+    ...s,
+    distance: haversine(userLoc.lat, userLoc.lng, s.lat, s.lng) || '',
+  }));
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (mapInstanceRef.current) return;
+
+    const centerLat = userLoc.lat || 45.62;
+    const centerLng = userLoc.lng || 9.22;
+
+    const map = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView([centerLat, centerLng], 12);
+    mapInstanceRef.current = map;
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    // User location marker
+    if (userLoc.lat) {
+      const userIcon = L.divIcon({
+        html: '<div style="width:14px;height:14px;background:#2c1f14;border-radius:50%;border:3px solid #c9a882;"></div>',
+        iconSize: [14,14], iconAnchor: [7,7], className: ''
+      });
+      L.marker([userLoc.lat, userLoc.lng], { icon: userIcon })
+        .addTo(map)
+        .bindPopup('<div style="font-family:DM Sans,sans-serif;font-size:12px;color:#2c1f14;">📍 Sei qui</div>');
+    }
+
+    // Slot markers
+    enriched.forEach(s => {
+      if (!s.lat || !s.lng) return;
+      const icon = L.divIcon({
+        html: '<div style="background:#2c1f14;color:#c9a882;border-radius:50% 50% 50% 0;width:32px;height:32px;transform:rotate(-45deg);border:2px solid #c9a882;display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-family:Georgia,serif;font-size:10px;font-weight:bold;">€' + s.price + '</span></div>',
+        iconSize: [32,32], iconAnchor: [16,32], className: ''
+      });
+      L.marker([s.lat, s.lng], { icon })
+        .addTo(map)
+        .bindPopup('<div style="font-family:DM Sans,sans-serif;min-width:160px;"><div style="font-family:Cormorant Garamond,serif;font-size:16px;color:#2c1f14;margin-bottom:4px;">' + s.name + '</div><div style="font-size:11px;color:#a07850;margin-bottom:2px;">' + s.salon + '</div><div style="font-size:11px;color:#a07850;margin-bottom:8px;">' + (s.distance ? '📍 ' + s.distance + ' · ' : '') + s.available + '</div><div style="font-size:14px;color:#2c1f14;font-weight:500;">€' + s.price + '</div></div>');
+    });
+  }, [userLoc.lat, enriched.length]);
+
+  return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', background:C.cream }}>
+      {/* Header */}
+      <div style={{ padding:'14px 20px', background:C.cream, borderBottom:'1px solid ' + C.linen, display:'flex', alignItems:'center', gap:14, position:'relative', zIndex:1000 }}>
+        <div onClick={onBack} style={{ cursor:'pointer', display:'flex', alignItems:'center', gap:6 }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 12L6 8l4-4" stroke={C.espresso} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <div style={{ fontFamily:"'Josefin Sans'", fontWeight:300, fontSize:11, letterSpacing:'0.38em', color:C.espresso, textTransform:'uppercase' }}>Mappa slot</div>
+        <div style={{ marginLeft:'auto', fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:C.caramel }}>
+          {enriched.filter(s => s.lat).length} slot sulla mappa
+        </div>
+      </div>
+
+      {/* Map */}
+      <div ref={mapRef} style={{ flex:1 }} />
+
+      {/* Bottom strip — slot list */}
+      {enriched.filter(s => s.lat).length > 0 && (
+        <div style={{ background:C.cream, borderTop:'1px solid ' + C.linen, padding:'14px 20px', maxHeight:160, overflowY:'auto' }}>
+          <div style={{ fontFamily:"'Josefin Sans'", fontWeight:300, fontSize:8, letterSpacing:'0.38em', color:C.caramel, textTransform:'uppercase', marginBottom:10 }}>Slot con posizione</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {enriched.filter(s => s.lat).map(s => (
+              <div key={s.id} onClick={() => onSelect(s)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer', padding:'8px 0', borderBottom:'1px solid ' + C.linen }}>
+                <div>
+                  <div style={{ fontFamily:"'Cormorant Garamond'", fontSize:15, color:C.espresso }}>{s.name}</div>
+                  <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:C.caramel }}>{s.salon}{s.distance ? ' · 📍 ' + s.distance : ''}</div>
+                </div>
+                <div style={{ fontFamily:"'Cormorant Garamond'", fontSize:16, color:C.espresso }}>€{s.price}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {enriched.filter(s => s.lat).length === 0 && (
+        <div style={{ padding:'20px', textAlign:'center', background:C.sand, borderTop:'1px solid ' + C.linen }}>
+          <div style={{ fontFamily:"'Cormorant Garamond'", fontStyle:'italic', fontSize:16, color:C.caramel }}>Nessuno slot con posizione GPS ancora</div>
+          <div style={{ fontFamily:"'DM Sans'", fontWeight:300, fontSize:11, color:C.caramel, marginTop:6 }}>Le coordinate vengono aggiunte dal form onboarding partner</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════
    APP ROOT
 ════════════════════════════════════════════ */
@@ -1645,7 +1850,7 @@ function KaumaApp() {
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState('home');
 
-  const showTabs = !['splash','detail','booking','payment','confirmation'].includes(screen);
+  const showTabs = !['splash','detail','booking','payment','confirmation','map'].includes(screen);
 
   function handleTab(id) {
     setTab(id);
@@ -1659,7 +1864,10 @@ function KaumaApp() {
           <SplashScreen onDone={() => setScreen('home')} />
         )}
         {screen === 'home' && (
-          <HomeScreen onSelect={t => { setSelected(t); setScreen('detail'); }} />
+          <HomeScreen onSelect={t => { setSelected(t); setScreen('detail'); }} onMap={() => setScreen('map')} />
+        )}
+        {screen === 'map' && (
+          <MapScreen onBack={() => setScreen('home')} onSelect={t => { setSelected(t); setScreen('detail'); }} />
         )}
         {screen === 'search' && (
           <SearchScreen />
